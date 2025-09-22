@@ -12,6 +12,7 @@ class Barang extends Model
         'kode_sakter',
         'special_code',
         'kode_register',
+        'kategori_id',
         'kode_barang',
         'nup',
         'nama_barang',
@@ -32,5 +33,15 @@ class Barang extends Model
     public function location()
     {
         return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    public function mutasi() 
+    { 
+        return $this->hasMany(\App\Models\MutasiBarang::class, 'barang_id'); 
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\Kategori::class, 'kategori_id');
     }
 }

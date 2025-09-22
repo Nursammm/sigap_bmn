@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\Location;
+use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -18,8 +19,23 @@ class BarangController extends Controller
 
     public function create()
     {
+        $kategoris = Kategori::orderBy('name')->get(['id','name']);
+
+    // daftar nama_barang unik per kategori_id -> ["1" => ["Laptop","Printer"], ...]
+    $namesBykategori = Barang::select('kategori_id','nama_barang')
+        ->whereNotNull('kategori_id')
+        ->whereNotNull('nama_barang')
+        ->distinct()
+        ->orderBy('nama_barang')
+        ->get()
+        ->groupBy('kategori_id')
+        ->map(fn($g) => $g->pluck('nama_barang')->values())
+        ->toArray();
+
         return view('barang.create', [
             'title' => 'Tambah Barang',
+            'kategoris'      => $kategoris,
+            'namesByCategory' => $namesBykategori,
         ]);
     }
     public function show(Barang $barang)
@@ -31,6 +47,7 @@ class BarangController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'kategori'        => 'required','string','max:100',
             'nama_barang'     => 'required|string|max:255',
             'kode_barang'     => 'required|string|max:100',
             'merek'           => 'nullable|string|max:255',
@@ -52,6 +69,23 @@ class BarangController extends Controller
             ['name' => $validated['lokasi']]  
         );
 
+        // Temukan / buat kategori
+        $catName = trim($validated['kategori']);
+        $kategori = Kategori::firstOrCreate(['name' => $catName]);
+
+        if (!$kategori->wasRecentlyCreated) {
+        $allowed = Barang::where('kategori_id', $kategori->id)
+            ->distinct()->pluck('nama_barang')->toArray();
+
+        if (!in_array($validated['nama_barang'], $allowed)) {
+            return back()->withErrors([
+                'nama_barang' => 'Nama barang harus dipilih dari kategori yang dipilih.'
+            ])->withInput();
+        }
+    }
+
+
+
         /**
          * 2. Hitung NUP untuk kode_barang ini
          */
@@ -71,6 +105,7 @@ class BarangController extends Controller
          * 4. Simpan barang
          */
         $barang = Barang::create([
+            'kategori_id'     => $kategori->id,
             'nama_barang'     => $validated['nama_barang'],
             'kode_barang'     => $validated['kode_barang'],
             'merek'           => $validated['merek'] ?? null,
@@ -130,7 +165,7 @@ class BarangController extends Controller
             'nama_barang'     => $validated['nama_barang'],
             'kode_barang'     => $validated['kode_barang'],
             'merek'           => $validated['merek'] ?? null,
-            'location_id'     => $lokasi->id, // update lokasi
+            'location_id'     => $lokasi->id,
             'nilai_perolehan' => $validated['nilai_perolehan'] ?? 0,
             'kondisi'         => $validated['kondisi'] ?? 'Baik'
         ]);

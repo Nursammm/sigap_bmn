@@ -118,9 +118,18 @@
                             </span>
                         </td>
                         <td class="px-3 py-2 text-center flex justify-center gap-2">
-                            <a href="{{ route('barang.show', $barang->id) }}" class="text-gray-400 hover:text-gray-700"><i class="fas fa-eye"></i></a>
-                            <a href="{{ route('barang.edit', $barang->id) }}" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></a>
-                            <button type="button" onclick="confirmDelete('{{ $barang->id }}','{{ $barang->nama_barang }}')" class="text-red-500 hover:text-red-700">
+                            <a href="{{ route('barang.show', $barang->id) }}" class="text-gray-400 hover:text-gray-700" title="Lihat Detail"><i class="fas fa-eye"></i></a>
+                            <a href="{{ route('barang.edit', $barang->id) }}" class="text-blue-500 hover:text-blue-700" title="Edit Barang"><i class="fas fa-edit"></i></a>
+                            <a href="{{ route('mutasi.create', $barang->id) }}" class="text-purple-500 hover:text-purple-700" title="Mutasi Barang"><i class="fas fa-exchange-alt"></i></a>
+                            <a href="{{ route('maintenance.index', ['barang_id'=>$barang->id]) }}"
+                                class="inline-flex items-center px-3 py-1.5 bg-white border rounded-lg text-xs hover:bg-gray-50 shadow">
+                                🛠 Riwayat
+                                </a>
+                                <a href="{{ route('maintenance.create', $barang) }}"
+                                class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 shadow">
+                                + Ajukan
+                                </a>
+                            <button type="button" onclick="confirmDelete('{{ $barang->id }}','{{ $barang->nama_barang }}')" class="text-red-500 hover:text-red-700" title="Hapus Barang">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                             <form id="delete-form-{{ $barang->id }}" method="POST" action="{{ route('barang.destroy', $barang->id) }}" class="hidden">
@@ -134,7 +143,6 @@
         </div>
     </div>
 
-    <!-- QR MODAL -->
     <div id="qr-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-all scale-95 opacity-0" id="qr-box">
         <div class="px-6 pt-6 text-center">
@@ -153,6 +161,7 @@
     </div>
 
     @push('scripts')
+    
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -167,7 +176,7 @@
                 pageLength: 10,
                 lengthMenu: [5, 10, 25, 50, 100],
                 searching: true,
-                ordering: false, // hilangkan panah sort di header tabel
+                ordering: false,
                 dom: 'lrtip',
                 language: {
                     lengthMenu: "Tampilkan _MENU_ entri",
@@ -189,7 +198,7 @@
             // Filter kondisi pakai dropdown
             $('#filterKondisi').on('change', function () {
                 let val = $(this).val();
-                table.column(9).search(val).draw(); // kolom kondisi ada di index ke-9
+                table.column(9).search(val).draw(); 
             });
         });
 
@@ -242,5 +251,6 @@
         });
     </script>
     @endif
+    
     @endpush
 </x-layout>

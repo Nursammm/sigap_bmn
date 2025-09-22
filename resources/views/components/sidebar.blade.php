@@ -5,10 +5,9 @@
     <div class="flex grow flex-col">
         
         <!-- Logo -->
- 
-    <div class="flex items-center justify-center h-25">
-        <img class="w-30 h-30 object-contain" src="{{ asset('storage/gap2.png') }}" alt="Logo">
-    </div>
+        <div class="flex items-center justify-center h-25">
+            <img class="w-30 h-30 object-contain" src="{{ asset('storage/gap2.png') }}" alt="Logo">
+        </div>
 
         <!-- Navigasi Utama -->
         <x-navbar></x-navbar>
@@ -39,9 +38,17 @@
                     x-transition.opacity.duration.100ms 
                     @click.outside="open=false"
                     class="absolute bottom-14 left-2 w-48 rounded-md bg-white py-1 text-gray-800 shadow-lg outline-1 outline-black/5">
+                    
                     <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Your profile</a>
                     <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Settings</a>
-                    <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Sign out</a>
+                    
+                    <!-- Logout -->
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full text-left block px-4 py-2 text-sm hover:bg-gray-100">
+                            Sign out
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

@@ -17,11 +17,26 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
+    public const ROLE_ADMIN     = 'admin';
+    public const ROLE_PENGELOLA = 'pengelola';
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isPengelola(): bool
+    {
+        return $this->role === self::ROLE_PENGELOLA;
+    }
 
     /**
      * The attributes that should be hidden for serialization.

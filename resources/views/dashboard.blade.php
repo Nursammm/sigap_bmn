@@ -1,5 +1,5 @@
 <x-layout>
-  <x-slot:title>{{ $title }}</x-slot>
+  <x-slot:title>{{ $title ?? 'Dashboard' }}</x-slot:title>
   <div class="px-8 py-6">
     <h1 class="text-4xl font-bold mb-2">Selamat Datang, Admin BMN</h1>
     <p class="text-gray-600 mb-6">Kelola dan pantau aset BMN dengan sistem terpadu</p>
