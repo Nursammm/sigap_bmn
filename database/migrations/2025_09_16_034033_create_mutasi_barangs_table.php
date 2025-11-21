@@ -9,12 +9,33 @@ return new class extends Migration {
     {
         Schema::create('mutasi_barangs', function (Blueprint $t) {
             $t->id();
-            $t->foreignId('barang_id')->constrained('barangs')->cascadeOnDelete();
-            $t->foreignId('from_location_id')->nullable()->constrained('locations')->nullOnDelete();
-            $t->foreignId('to_location_id')->constrained('locations')->cascadeOnDelete();
-            $t->foreignId('moved_by')->constrained('users')->cascadeOnDelete();
+
+            // Hapus barang -> mutasi ikut hard-delete (CASCADE)
+            $t->foreignId('barang_id')
+              ->constrained('barangs')
+              ->cascadeOnDelete();
+
+            // Jika lokasi dihapus, riwayat tidak hilang -> set NULL
+            $t->foreignId('from_location_id')
+              ->nullable()
+              ->constrained('locations')
+              ->nullOnDelete();
+
+            // Dulu CASCADE, ubah ke NULL agar riwayat tetap ada
+            $t->foreignId('to_location_id')
+              ->nullable()
+              ->constrained('locations')
+              ->nullOnDelete();
+
+            // Jika user dihapus, riwayat tetap ada -> set NULL
+            $t->foreignId('moved_by')
+              ->nullable()
+              ->constrained('users')
+              ->nullOnDelete();
+
             $t->date('tanggal');
             $t->text('catatan')->nullable();
+
             $t->timestamps();
 
             $t->index(['barang_id','tanggal']);

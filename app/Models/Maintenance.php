@@ -3,31 +3,36 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class Maintenance extends Model
 {
     protected $fillable = [
-        'barang_id','tanggal_mulai','tanggal_selesai','jenis','uraian','biaya',
-        'vendor','status','requested_by','approved_by','lampiran_path'
+        'barang_id',
+        'tanggal_mulai',
+        'tanggal_selesai',
+        'uraian',
+        'biaya',
+        'status',
+        'requested_by',
+        'approved_by',
+        'photo_path',
+        'admin_note', 
     ];
 
-     protected $casts   = ['tanggal_mulai'=>'date','tanggal_selesai'=>'date'];
-    protected $appends = ['lampiran_url'];
+    protected $casts = [
+        'tanggal_mulai'   => 'date',
+        'tanggal_selesai' => 'date',
+        'biaya'           => 'integer',
+        'photo_path'      => 'array',
+    ];
 
-    public function barang()    { return $this->belongsTo(\App\Models\Barang::class,'barang_id'); }
-    public function requester() { return $this->belongsTo(\App\Models\User::class,'requested_by'); }
-    public function approver()  { return $this->belongsTo(\App\Models\User::class,'approved_by'); }
-
-    public function getLampiranUrlAttribute(): ?string
+    public function scopeOpen($q)
     {
-        return $this->lampiran_path ? asset('storage/'.$this->lampiran_path) : null;
+        return $q->whereIn('status', ['Diajukan','Disetujui','Proses']);
     }
 
-    protected static function booted()
-    {
-        static::deleting(function (self $m) {
-            if ($m->lampiran_path) Storage::disk('public')->delete($m->lampiran_path);
-        });
-    }
+    // Relasi
+    public function barang()    { return $this->belongsTo(Barang::class, 'barang_id'); }
+    public function requester() { return $this->belongsTo(User::class, 'requested_by'); }
+    public function approver()  { return $this->belongsTo(User::class, 'approved_by'); }
 }

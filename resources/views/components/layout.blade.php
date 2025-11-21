@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link rel="icon" href="{{ asset('storage/letter-s.ico') }}?v={{ time() }}" type="image/x-icon">
   <title>{{ $title ?? 'Dashboard' }}</title>
   <style>[x-cloak]{display:none!important}</style>
 </head>
@@ -62,6 +63,24 @@
     </div>
   </div>
 </div>
+
+{{-- CDN SweetAlert2 --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if (session('success') || session('error') || session('ok'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: '{{ session('error') ? 'error' : 'success' }}',
+                title: {!! json_encode(session('error') ? 'Terjadi Kesalahan' : 'Berhasil') !!},
+                text: {!! json_encode(session('error') ?? session('success') ?? session('ok')) !!},
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#2563eb'
+            });
+        });
+    </script>
+@endif
+
 
 </body>
 </html>

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('kode_sakter');             
             $table->string('special_code')->index();  
-            $table->string('kode_register')->unique(); 
+            $table->string('kode_register'); 
             $table->string('kode_barang');             
             $table->unsignedInteger('nup');         
             $table->string('nama_barang');

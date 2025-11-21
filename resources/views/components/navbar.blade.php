@@ -6,7 +6,7 @@
     Barang
 </x-nav-link>
 
-<x-nav-link href="{{ route('ruangan.index') }}" :active="request()->routeIs('ruangan.*')" icon="report">
+<x-nav-link href="{{ route('ruangan.index') }}" :active="request()->routeIs('ruangan.*')" icon="ruangan">
     Ruangan
 </x-nav-link>
 
@@ -14,6 +14,6 @@
     History
 </x-nav-link>
 
-<x-nav-link href="{{ route('maintenance.index') }}" :active="request()->routeIs('maintenance.*')" icon="mutasi">
+<x-nav-link href="{{ route('maintenance.index') }}" :active="request()->routeIs('maintenance.*')" icon="maintenance">
     Maintenance
 </x-nav-link>

@@ -14,37 +14,37 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Kode Satker</label>
                         <input type="text" name="kode_sakter" value="{{ $barang->kode_sakter ?? '' }}" 
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Kode Barang</label>
+                        <label class="block text-sm font font-medium text-gray-600 mb-1">Kode Barang</label>
                         <input type="text" name="kode_barang" value="{{ $barang->kode_barang }}" required
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Nama Barang</label>
                         <input type="text" name="nama_barang" value="{{ $barang->nama_barang }}" required
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Merek</label>
                         <input type="text" name="merek" value="{{ $barang->merek }}" 
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Tanggal Perolehan</label>
                         <input type="date" name="tgl_perolehan" value="{{ $barang->tgl_perolehan }}" 
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Kondisi</label>
                         <select name="kondisi" 
-                                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
                             <option value="Baik" {{ $barang->kondisi == 'Baik' ? 'selected' : '' }}>Baik</option>
                             <option value="Rusak Ringan" {{ $barang->kondisi == 'Rusak Ringan' ? 'selected' : '' }}>Rusak Ringan</option>
                             <option value="Rusak Berat" {{ $barang->kondisi == 'Rusak Berat' ? 'selected' : '' }}>Rusak Berat</option>
@@ -55,44 +55,68 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Lokasi</label>
                         <input type="text" name="lokasi" value="{{ old('lokasi', $barang->location->name ?? '') }}" 
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Nilai Perolehan</label>
-                        <input type="number" name="nilai_perolehan" value="{{ $barang->nilai_perolehan }}" 
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                    </div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Nilai Perolehan</label>
+                    <!-- INPUT TAMPILAN -->
+                    <input
+                        type="text"
+                        id="nilai_perolehan_format"
+                        value="{{ number_format($barang->nilai_perolehan, 0, ',', '.') }}"
+                        class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
+                        oninput="formatRupiah(this, 'nilai_perolehan')"
+                        onblur="formatRupiah(this, 'nilai_perolehan')"
+                        onfocus="unformatForEdit(this)"
+                        autocomplete="off"
+                    >
+                    <!-- INPUT RAW (untuk dikirim ke server) -->
+                    <input 
+                        type="hidden" 
+                        name="nilai_perolehan" 
+                        id="nilai_perolehan" 
+                        value="{{ (int)$barang->nilai_perolehan }}"
+                    >
                 </div>
 
-                <!-- Foto barang -->
+                </div>
+
+                <!-- FOTO BARANG MULTIPLE -->
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-2">Foto Barang</label>
-                    @if($barang->foto_url)
-                        <div class="mb-3">
-                            <img src="{{ asset('storage/'.$barang->foto_url) }}" alt="Foto Barang" 
-                                 class="w-28 h-28 object-cover rounded-lg border border-gray-300 shadow-sm">
+
+                    <!-- Foto Lama -->
+                    @if(!empty($barang->foto_url) && is_array($barang->foto_url))
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            @foreach($barang->foto_url as $foto)
+                                <img src="{{ asset('storage/'.$foto) }}" 
+                                     onclick="openModal('{{ asset('storage/'.$foto) }}')" 
+                                     class="w-28 h-28 object-cover rounded-lg border cursor-pointer hover:opacity-80">
+                            @endforeach
                         </div>
                     @endif
 
-                    <!-- Custom file input -->
+                    <!-- Input Multiple -->
                     <div class="flex items-center gap-3">
                         <label for="foto_url" 
                                class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg font-medium shadow hover:bg-blue-700 transition">
-                            📂 Pilih File
+                            Pilih Foto
                         </label>
                         <span id="file-chosen" class="text-sm text-gray-500">Belum ada file dipilih</span>
                     </div>
-                    <input type="file" name="foto_url" id="foto_url" accept=".jpg,.jpeg,.png" class="hidden" onchange="document.getElementById('file-chosen').textContent = this.files[0]?.name || 'Belum ada file dipilih'">
 
-                    <span class="block text-xs text-gray-500 mt-2">Format: jpg, jpeg, png. Maksimal 2MB.</span>
+                    <input type="file" name="foto_url[]" id="foto_url" multiple accept=".jpg,.jpeg,.png"
+                           class="hidden">
+
+                    <span class="block text-xs text-gray-500 mt-2">Anda dapat memilih lebih dari satu foto.</span>
                 </div>
 
                 <!-- Tombol -->
                 <div class="pt-6 flex gap-3 justify-end">
                     <button type="submit" 
                             class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium shadow hover:bg-blue-700 transition">
-                        💾 Simpan
+                        Simpan
                     </button>
                     <a href="{{ route('barang.index') }}" 
                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium shadow hover:bg-gray-300 transition">
@@ -103,13 +127,65 @@
         </div>
     </div>
 
-    <!-- Script kecil untuk update nama file -->
-    <script>
-        const fileInput = document.getElementById('foto_url');
-        const fileChosen = document.getElementById('file-chosen');
+    <!-- Modal Preview Foto -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-60 hidden justify-center items-center">
+        <img id="modal-img" src="" class="max-w-[90%] max-h-[90%] rounded-lg shadow-lg">
+    </div>
 
-        fileInput.addEventListener('change', function(){
-            fileChosen.textContent = this.files[0]?.name || 'Belum ada file dipilih';
+    <script>
+        // update nama file
+        document.getElementById('foto_url').addEventListener('change', function(){
+            const names = Array.from(this.files).map(f => f.name).join(', ');
+            document.getElementById('file-chosen').textContent = names || 'Belum ada file dipilih';
+        });
+
+        // modal preview
+        function openModal(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        document.getElementById('modal').addEventListener('click', function(){
+            this.classList.add('hidden');
         });
     </script>
+
+    <script>
+        // Format angka menjadi 1.234.567
+        function formatRupiah(el, hiddenId) {
+            let onlyNums = (el.value || '').replace(/[^0-9]/g, '');
+            const hidden = document.getElementById(hiddenId);
+            if (hidden) hidden.value = onlyNums;
+
+            if (!onlyNums) {
+                el.value = '';
+                return;
+            }
+
+            el.value = onlyNums.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Saat fokus, hilangkan titik supaya mudah edit
+        function unformatForEdit(el) {
+            el.value = (el.value || '').replace(/[^0-9]/g, '');
+        }
+
+        // Format ulang saat halaman load (jika ada nilai awal)
+        document.addEventListener('DOMContentLoaded', () => {
+            const fields = [
+                ['nilai_perolehan_format', 'nilai_perolehan'],
+                ['biaya_format', 'biaya']
+            ];
+
+            fields.forEach(([displayId, hiddenId]) => {
+                const display = document.getElementById(displayId);
+                const hidden = document.getElementById(hiddenId);
+
+                if (display && hidden && hidden.value) {
+                    display.value = hidden.value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                }
+            });
+        });
+    </script>
+
 </x-layout>

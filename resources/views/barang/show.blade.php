@@ -1,92 +1,148 @@
-{{-- filepath: c:\laragon\www\sigap-bmn\resources\views\barang\show.blade.php --}}
 <x-layout>
     <x-slot name="title">Detail Barang</x-slot>
 
-    <div class="max-w-2xl mx-auto mt-10">
-        <div class="bg-gradient-to-br from-blue-900 via-blue-700 to-blue-400 p-8 rounded-2xl shadow-2xl border border-blue-300 relative overflow-hidden">
-            <div class="absolute top-0 right-0 opacity-20 pointer-events-none">
-                <svg width="180" height="180"><circle cx="90" cy="90" r="80" fill="#fff" /></svg>
-            </div>
-            <div class="flex items-center mb-8">
+    <div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 px-4 mt-8">
+        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-3xl border border-gray-200">
+
+            @php
+                // Normalisasi foto_url supaya selalu berupa array
+                $raw = $barang->foto_url;
+
+                if (is_array($raw)) {
+                    $fotos = $raw;
+                } elseif (is_string($raw) && $raw !== '') {
+                    $decoded = json_decode($raw, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        $fotos = $decoded;
+                    } else {
+                        $fotos = [$raw];
+                    }
+                } else {
+                    $fotos = [];
+                }
+            @endphp
+            
+            <div class="flex items-start mb-8 border-b pb-4">
                 <div class="flex-shrink-0">
-                    @if($barang->foto_url)
-                        <div class="group relative">
-                            <img src="{{ asset('storage/'.$barang->foto_url) }}"
-                                 alt="Foto {{ $barang->nama_barang }}"
-                                 class="w-40 h-40 object-cover rounded-2xl border-4 border-blue-400 shadow-xl ring-4 ring-blue-200 transition duration-300 group-hover:scale-105 cursor-pointer">
-                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-40 rounded-2xl">
-                                <a href="{{ asset('storage/'.$barang->foto_url) }}" target="_blank"
-                                   class="px-4 py-2 bg-white text-blue-700 rounded-lg font-semibold shadow hover:bg-blue-100 transition">
-                                    Lihat Ukuran Penuh
-                                </a>
-                            </div>
-                        </div>
-                    @else
-                        <div class="w-40 h-40 flex items-center justify-center bg-gray-100 rounded-2xl border text-gray-400">
-                            <span>Tidak ada foto</span>
-                        </div>
-                    @endif
+                    <div class="bg-white p-3 rounded-2xl shadow-md border border-gray-200">
+                        @php
+                            $qrData = $barang->alternatif_qr;
+                        @endphp
+                        
+                        {!! QrCode::size(130)
+                        ->backgroundColor(255,255,255)
+                        ->generate($qrData) !!}
+                    </div>
                 </div>
-                <div class="ml-8">
-                    <h1 class="text-3xl font-extrabold text-white mb-2 tracking-wide drop-shadow-lg">{{ $barang->nama_barang }}</h1>
-                    <span class="inline-block px-4 py-1 rounded-full bg-blue-200 text-blue-900 text-xs font-bold shadow">
+
+                <div class="ml-6">
+                    <h1 class="text-3xl font-bold text-gray-800">{{ $barang->nama_barang }}</h1>
+                    <span class="inline-block mt-2 px-4 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-semibold shadow-sm">
                         {{ $barang->kondisi }}
                     </span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-x-8 gap-y-6 text-base mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                 <div>
-                    <span class="text-blue-200">Kode Sakter</span>
-                    <div class="font-semibold text-white">{{ $barang->kode_sakter }}</div>
+                    <label class="block text-gray-500 text-sm mb-1">Kode Satker</label>
+                    <div class="font-semibold text-gray-800">{{ $barang->kode_sakter }}</div>
                 </div>
                 <div>
-                    <span class="text-blue-200">Special Code</span>
-                    <div class="font-semibold text-white">{{ $barang->special_code }}</div>
+                    <label class="block text-gray-500 text-sm mb-1">Special Code</label>
+                    <div class="font-semibold text-gray-800">{{ $barang->special_code }}</div>
                 </div>
                 <div>
-                    <span class="text-blue-200">Kode Register</span>
-                    <div class="font-semibold text-white">{{ $barang->kode_register }}</div>
+                    <label class="block text-gray-500 text-sm mb-1">Kode Register</label>
+                    <div class="font-semibold text-gray-800">{{ $barang->kode_register }}</div>
                 </div>
                 <div>
-                    <span class="text-blue-200">Kode Barang</span>
-                    <div class="font-semibold text-white">{{ $barang->kode_barang }}</div>
+                    <label class="block text-gray-500 text-sm mb-1">Kode Barang</label>
+                    <div class="font-semibold text-gray-800">{{ $barang->kode_barang }}</div>
                 </div>
                 <div>
-                    <span class="text-blue-200">NUP</span>
-                    <div class="font-semibold text-white">{{ $barang->nup }}</div>
+                    <label class="block text-gray-500 text-sm mb-1">NUP</label>
+                    <div class="font-semibold text-gray-800">{{ $barang->nup }}</div>
                 </div>
                 <div>
-                    <span class="text-blue-200">Merek</span>
-                    <div class="font-semibold text-white">{{ $barang->merek ?? '-' }}</div>
+                    <label class="block text-gray-500 text-sm mb-1">Merek</label>
+                    <div class="font-semibold text-gray-800">{{ $barang->merek ?? '-' }}</div>
                 </div>
                 <div>
-                    <span class="text-blue-200">Lokasi</span>
-                    <div class="font-semibold text-white">{{ $barang->location->name ?? '-' }}</div>
+                    <label class="block text-gray-500 text-sm mb-1">Lokasi</label>
+                    <div class="font-semibold text-gray-800">{{ $barang->location->name ?? '-' }}</div>
                 </div>
                 <div>
-                    <span class="text-blue-200">Nilai Perolehan</span>
-                    <div class="font-semibold text-green-300">Rp {{ number_format($barang->nilai_perolehan, 0, ',', '.') }}</div>
+                    <label class="block text-gray-500 text-sm mb-1">Nilai Perolehan</label>
+                    <div class="font-semibold text-green-600">
+                        Rp {{ number_format($barang->nilai_perolehan, 0, ',', '.') }}
+                    </div>
                 </div>
-                <div>
-                    <span class="text-blue-200">Keterangan</span>
-                    <div class="font-semibold text-white">{{ $barang->keterangan}}</div>
+                <div class="md:col-span-2">
+                    <label class="block text-gray-500 text-sm mb-1">Keterangan</label>
+                    <div class="font-semibold text-gray-800">{{ $barang->keterangan ?? '-' }}</div>
                 </div>
             </div>
 
-            <div class="flex flex-col items-center mt-4">
-                <span class="text-blue-100 mb-2 font-semibold tracking-wide">QR Code Barang</span>
-                <div class="bg-white p-4 rounded-xl shadow-lg border-2 border-blue-300">
-                    {!! QrCode::size(140)->backgroundColor(255,255,255)->generate(route('barang.show', $barang->id)) !!}
-                </div>
-            </div>
+            @if(count($fotos))
+                <div x-data="{ open:false, activeSrc:'' }" class="mt-8">
+                    <h2 class="text-sm font-semibold text-gray-600 mb-2">
+                        Foto Barang
+                    </h2>
 
-            <div class="mt-8 flex justify-end">
-                <a href="{{ route('barang.index') }}"
-                   class="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white rounded-lg font-semibold shadow hover:from-blue-700 hover:to-blue-500 transition">
-                    Kembali
+                    <div class="flex gap-3 overflow-x-auto pb-2">
+                        @foreach($fotos as $foto)
+                            <button type="button"
+                                        class="flex-shrink-0 focus:outline-none"
+                                        @click="open = true; activeSrc = '{{ asset('storage/'.$foto) }}'">
+                                <img src="{{ asset('storage/'.$foto) }}"
+                                            alt="Foto {{ $barang->nama_barang }}"
+                                            class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm hover:opacity-90 transition">
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <template x-if="open">
+                        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+                                 @click.self="open = false">
+                            <div class="bg-white p-4 rounded-xl max-w-3xl w-full mx-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-semibold text-gray-700 text-sm">
+                                        Foto {{ $barang->nama_barang }}
+                                    </h3>
+                                    <button class="text-gray-500 hover:text-gray-700 text-xl leading-none"
+                                            @click="open = false">&times;</button>
+                                </div>
+                                <div class="flex justify-center">
+                                    <img :src="activeSrc"
+                                            alt="Foto {{ $barang->nama_barang }}"
+                                            class="max-h-[80vh] w-auto rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            @else
+                <p class="mt-8 text-xs text-gray-400">
+                    Tidak ada foto barang yang diunggah.
+                </p>
+            @endif
+
+            <div class="pt-6 flex justify-end gap-3 mt-6 border-t">
+                <a href="{{ route('barang.index') }}" 
+                    class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium shadow hover:bg-gray-300 transition">
+                    ← Kembali
                 </a>
+                @auth
+                    @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('barang.edit', $barang->id) }}" 
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium shadow hover:bg-blue-700 transition">
+                        ✏️ Edit
+                    </a>
+                @endif
+                @endauth
             </div>
+
         </div>
     </div>
 </x-layout>

@@ -21,6 +21,9 @@ class RuanganController extends Controller
         // Query barang di ruangan terpilih
         $base = Barang::query()
             ->with(['category','location'])
+            ->withCount([
+                'maintenances as open_maintenance_count' => fn($q) => $q->open()
+            ])
             ->when($lokasiId > 0, fn($q) => $q->where('location_id', $lokasiId))
             ->when($search !== '', function ($q) use ($search) {
                 $s = "%{$search}%";
@@ -35,6 +38,7 @@ class RuanganController extends Controller
                 fn($q) => $q->where('kondisi', $kondisi))
             ->latest('tgl_perolehan');
 
+        // Paginasi
         $barangs = $base->paginate(15)->appends($request->query());
 
         // Statistik kondisi untuk ruangan terpilih
@@ -49,7 +53,10 @@ class RuanganController extends Controller
         // Ruangan aktif (opsional)
         $activeLocation = $lokasiId ? $locations->firstWhere('id', $lokasiId) : null;
 
-        return view('ruangan.index', compact('locations','barangs','stats','activeLocation','lokasiId','search','kondisi'));
+        return view('ruangan.index', compact(
+            'locations','barangs','stats','activeLocation',
+            'lokasiId','search','kondisi'
+        ));
     }
 
     public function print(Request $request)
@@ -80,5 +87,15 @@ class RuanganController extends Controller
         $location = $lokasiId ? Location::find($lokasiId) : null;
 
         return view('ruangan.print', compact('items','location','search','kondisi'));
+    }
+
+    public function show(Location $location)
+    {
+        $barangs = Barang::with('location')
+            ->where('location_id', $location->id)
+            ->latest('tgl_perolehan')
+            ->paginate(20);
+
+        return view('ruangan.show', compact('location','barangs'));
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Barang extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'kode_sakter',
         'special_code',
@@ -25,23 +26,29 @@ class Barang extends Model
         'qr_string',
         'location_id',
         'sn',
-        'alternatif_qr'
+        'alternatif_qr',
     ];
-    protected $casts = ['tgl_perolehan'=>'date','nilai_perolehan'=>'decimal:2'];
 
+    protected $casts = [
+        'tgl_perolehan'   => 'date',
+        'nilai_perolehan' => 'decimal:2',
+        'foto_url'        => 'array',
+    ];
 
-    public function location()
+    // ===== Relasi
+    public function location()     { return $this->belongsTo(Location::class, 'location_id'); }
+    public function mutasi()       { return $this->hasMany(MutasiBarang::class, 'barang_id'); }
+    public function maintenances() { return $this->hasMany(Maintenance::class, 'barang_id'); }
+    public function category()     { return $this->belongsTo(Kategori::class, 'kategori_id'); }
+
+    // ===== (Opsional) Sabuk pengaman hard-delete anak
+    protected static function booted()
     {
-        return $this->belongsTo(Location::class, 'location_id');
-    }
-
-    public function mutasi() 
-    { 
-        return $this->hasMany(\App\Models\MutasiBarang::class, 'barang_id'); 
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(\App\Models\Kategori::class, 'kategori_id');
+        static::deleting(function (Barang $barang) {
+            // Jika FK ON DELETE CASCADE sudah benar, blok ini tidak wajib.
+            // Tetap kita jaga-jaga untuk data lama / FK belum cascade.
+            $barang->mutasi()->delete();
+            $barang->maintenances()->delete();
+        });
     }
 }

@@ -1,5 +1,7 @@
-<svg {{ $attributes->merge(['class' => 'w-5 h-5']) }}
-     xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M12 2a10 10 0 1 1-9.16 6H2v3H8V5H5.12A10 10 0 0 1 12 2z"/>
-  <path d="M12 7v6l4 2" fill="currentColor"/>
+<svg {{ $attributes->merge(['class' => 'w-6 h-6 mr-2 inline-block align-middle']) }}
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     fill="currentColor"
+     aria-hidden="true">
+  <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" />
 </svg>
