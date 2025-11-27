@@ -7,7 +7,7 @@
 
             <!-- Logo -->
             <div class="flex justify-center mb-5">
-                <img src="{{ asset('storage/gap2.png') }}" alt="Logo" class="w-19 h-16 drop-shadow-md">
+                <img src="{{ asset('storage/gap2.png') }}" alt="Logo" class="w-19 h-18 drop-shadow-md">
             </div>
 
             <!-- Judul -->
@@ -55,14 +55,6 @@
                     Sign In
                 </button>
             </form>
-
-            <!-- Register -->
-            <p class="text-center text-sm text-gray-300 mt-6">
-                Don't have an account?
-                <a href="{{ route('register') }}" class="text-white font-semibold hover:underline">
-                    Sign up
-                </a>
-            </p>
         </div>
     </div>
 </x-guest-layout>

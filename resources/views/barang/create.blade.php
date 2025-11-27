@@ -8,75 +8,48 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    @php
-                        // mapping "nama kategori => id" untuk lookup di Alpine
-                        $catNameToId = $kategoris->pluck('id', 'name');
-                    @endphp
-
-                    <input type="hidden" name="nama_barang" x-model="$store.cat.finalName">
-
-                    {{-- KATEGORI (datalist: pilih atau ketik) --}}
-                    <div x-data x-init="$store.cat.init()">
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Nama Barang</label>
                         <input
                             type="text"
-                            name="kategori"
-                            list="categoryOptions"
-                            x-model="$store.cat.kategori"
-                            x-on:input="$store.cat.onKategoriChange($event.target.value)"
-                            value="{{ old('kategori') }}"
-                            placeholder="Ketik atau pilih kategori…"
+                            name="nama_barang"
+                            id="nama_barang"
+                            value="{{ old('nama_barang') }}"
+                            list="namaBarangList"
+                            placeholder="Ketik atau pilih nama barang…"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            required>
-                        <datalist id="categoryOptions">
-                            @foreach ($kategoris as $c)
-                                <option value="{{ $c->name }}"></option>
+                            required
+                        >
+
+                        {{-- daftar nama barang dari database (mapping nama -> kode) --}}
+                        <datalist id="namaBarangList">
+                            @foreach(($nameCodeMap ?? []) as $nama => $kode)
+                                <option value="{{ $nama }}"></option>
                             @endforeach
                         </datalist>
-                        @error('kategori')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
-                        <p class="mt-1 text-xs text-gray-500">
-                            Jika memilih kategori yang sudah ada, Nama Barang hanya bisa dipilih dari daftar kategori tersebut.
-                        </p>
+
+                        @error('nama_barang')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+
                     </div>
 
-                    {{-- NAMA BARANG: SELECT jika kategori existing; INPUT jika kategori baru --}}
-                    <div x-data class="space-y-1">
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Nama Barang</label>
-
-                        {{-- SELECT (kategori existing) --}}
-                        <select
-                            x-show="$store.cat.isExisting"
-                            x-cloak
-                            x-model="$store.cat.finalName"
-                            :required="$store.cat.isExisting"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Pilih Nama Barang</option>
-                            <template x-for="nm in $store.cat.suggestions" :key="nm">
-                                <option x-bind:value="nm" x-text="nm"></option>
-                            </template>
-                        </select>
-
-                        {{-- INPUT (kategori baru) --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">
+                            Kode Barang
+                        </label>
                         <input
-                            x-show="!$store.cat.isExisting"
-                            x-cloak
                             type="text"
-                            placeholder="Ketik nama barang…"
-                            x-model="$store.cat.finalName"
-                            :required="!$store.cat.isExisting"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-
-                        @error('nama_barang')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
-                        <p class="text-xs text-gray-500" x-show="$store.cat.isExisting" x-cloak>
-                            Pilih salah satu nama barang yang tersedia pada kategori dipilih.
-                        </p>
-                        <p class="text-xs text-gray-500" x-show="!$store.cat.isExisting" x-cloak>
-                            Kategori baru: silakan ketik nama barang.
-                        </p>
+                            name="kode_barang"
+                            id="kode_barang"
+                            value="{{ old('kode_barang') }}"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                        @error('kode_barang')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
-                    {{-- ================== /KATEGORI & NAMA BARANG ================== --}}
 
-                    {{-- Kode Sakter --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Kode Sakter</label>
                         <input type="text" name="kode_sakter"
@@ -85,22 +58,12 @@
                         @error('kode_sakter')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
-                    {{-- Kode Register --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Kode Register</label>
                         <input type="text" name="kode_register"
                                value="{{ old('kode_register') }}"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         @error('kode_register')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
-                    </div>
-
-                    {{-- Kode Barang --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Kode Barang</label>
-                        <input type="text" name="kode_barang"
-                               value="{{ old('kode_barang') }}"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        @error('kode_barang')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     {{-- Nomor Seri --}}
@@ -149,13 +112,13 @@
                             name="nilai_perolehan"
                             id="nilai_perolehan"
                             value="{{ old('nilai_perolehan') }}"
+                            required
                         >
 
                         @error('nilai_perolehan')
                             <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
 
                     {{-- Lokasi (dropdown + opsi Lainnya) --}}
                     <div x-data="{ showOther: {{ old('lokasi_baru') ? 'true' : 'false' }} }">
@@ -164,7 +127,7 @@
                         <select name="location_id"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 @change="showOther = ($event.target.value === 'other')"
-                                required>
+                                >
                             <option value="">Pilih Lokasi</option>
 
                             @foreach($locations as $loc)
@@ -274,53 +237,25 @@
         </div>
     </div>
 
-    {{-- Alpine Store: logika dependent fields untuk Kategori & Nama Barang --}}
+    {{-- AUTO-FILL KODE BARANG BERDASARKAN NAMA BARANG --}}
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('cat', {
-                // state
-                kategori:  @json(old('kategori','')),
-                finalName: @json(old('nama_barang','')),
+        document.addEventListener('DOMContentLoaded', function () {
+            // mapping dari controller: { "Nama Barang": "KODE123", ... }
+            const nameToCode = @json($nameCodeMap ?? []);
 
-                // data dari server
-                mapCatNameToId: @json($catNameToId),      // { "Elektronik": 1, ... }
-                namesByCatId:   @json($namesByCategory),  // { "1": ["Laptop","Printer"], ... }
+            const namaInput = document.getElementById('nama_barang');
+            const kodeInput = document.getElementById('kode_barang');
 
-                suggestions: [],
-
-                init() { this.refreshSuggestions(); },
-
-                normalized(v){ return (v || '').trim().toLowerCase(); },
-
-                get isExisting() {
-                    const n = this.normalized(this.kategori);
-                    for (const k in this.mapCatNameToId) {
-                        if (this.normalized(k) === n) return true;
+            if (namaInput && kodeInput) {
+                namaInput.addEventListener('change', function () {
+                    const nama = this.value;
+                    if (nameToCode[nama]) {
+                        // jika nama sudah pernah ada di DB, isi otomatis kode_barang
+                        kodeInput.value = nameToCode[nama];
                     }
-                    return false;
-                },
-
-                get catId() {
-                    const n = this.normalized(this.kategori);
-                    for (const k in this.mapCatNameToId) {
-                        if (this.normalized(k) === n) return this.mapCatNameToId[k];
-                    }
-                    return null;
-                },
-
-                refreshSuggestions() {
-                    const id = this.catId;
-                    this.suggestions = id && this.namesByCatId[id] ? this.namesByCatId[id] : [];
-                    // kosongkan nama kalau tidak ada dalam opsi saat kategori existing
-                    if (this.isExisting && !this.suggestions.includes(this.finalName)) {
-                        this.finalName = '';
-                    }
-                },
-
-                onKategoriChange() {
-                    this.refreshSuggestions();
-                },
-            });
+                    // jika tidak ada di mapping, biarkan kosong/isi manual oleh user
+                });
+            }
         });
     </script>
 

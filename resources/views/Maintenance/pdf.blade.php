@@ -216,8 +216,9 @@
     {{-- TTD kanan --}}
     <div class="ttd-wrapper">
         <div class="ttd-kanan">
-            ttd,<br>
-            Pejabat Pengadaan pada lembaga Penyiaran Publik Tekevisi Republik Indonesia<br>
+            Ketua Tim,<br>
+            <br>
+            <br>Ttd<br>
         </div>
     </div>
 

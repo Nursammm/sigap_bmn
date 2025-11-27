@@ -8,6 +8,7 @@ use App\Http\Controllers\MutasiBarangController;
 use App\Http\Controllers\RuanganController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\UserController;
 
 // untuk filter "read all" notifikasi mutasi
 use App\Notifications\MutasiRequestedNotification;
@@ -88,9 +89,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/ruangan/print', [RuanganController::class, 'print'])
         ->name('ruangan.print');
+    Route::get('/ruangan/export-excel', [RuanganController::class, 'exportExcel'])->name('ruangan.exportExcel');
 
-    Route::get('/ruangan/{location}', [\App\Http\Controllers\RuanganController::class, 'show'])
-        ->name('ruangan.show');
+    Route::get('/ruangan/export-pdf', [RuanganController::class, 'exportPdf'])->name('ruangan.exportPdf');
+
+    Route::get('/ruangan/{location}', [RuanganController::class, 'show'])->name('ruangan.show');
+
+
+
 
     /* ---------------- Maintenance -------------- */
 
@@ -145,6 +151,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/notifications/bulk-delete', [NotificationController::class, 'destroySelected'])
     ->name('notifications.destroySelected');
    });
+
+   Route::resource('users', UserController::class);
+
    
 
 });

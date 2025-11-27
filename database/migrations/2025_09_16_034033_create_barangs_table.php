@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('kode_sakter');             
             $table->string('special_code')->index();  
-            $table->string('kode_register'); 
+            $table->string('kode_register')->nullable(); 
             $table->string('kode_barang');             
             $table->unsignedInteger('nup');         
             $table->string('nama_barang');
@@ -24,10 +24,10 @@ return new class extends Migration
             $table->text('keterangan')->nullable();
 
             $table->string('foto_url')->nullable();   
-            $table->enum('kondisi', ['Baik','Rusak Ringan','Rusak Berat','Hilang'])->default('Baik');
+            $table->enum('kondisi', ['Baik','Rusak Ringan','Rusak Berat','Hilang','Belum Teridentifikasi'])->default('Baik');
             $table->decimal('nilai_perolehan', 15, 2)->nullable();
 
-            $table->string('qr_string');   
+            $table->string('qr_string')->nullable();   
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->string('sn')->nullable();
             $table->string('alternatif_qr');        

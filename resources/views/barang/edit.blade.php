@@ -13,72 +13,81 @@
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Kode Satker</label>
-                        <input type="text" name="kode_sakter" value="{{ $barang->kode_sakter ?? '' }}" 
+                        <input type="text" name="kode_sakter" value="{{ old('kode_sakter', $barang->kode_sakter ?? '') }}" 
                                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+                        @error('kode_sakter')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font font-medium text-gray-600 mb-1">Kode Barang</label>
-                        <input type="text" name="kode_barang" value="{{ $barang->kode_barang }}" required
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Kode Barang</label>
+                        <input type="text" name="kode_barang" value="{{ old('kode_barang', $barang->kode_barang) }}" required
                                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+                        @error('kode_barang')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Nama Barang</label>
-                        <input type="text" name="nama_barang" value="{{ $barang->nama_barang }}" required
+                        <input type="text" name="nama_barang" value="{{ old('nama_barang', $barang->nama_barang) }}" required
                                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+                        @error('nama_barang')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Merek</label>
-                        <input type="text" name="merek" value="{{ $barang->merek }}" 
+                        <input type="text" name="merek" value="{{ old('merek', $barang->merek) }}" 
                                class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+                        @error('merek')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Tanggal Perolehan</label>
-                        <input type="date" name="tgl_perolehan" value="{{ $barang->tgl_perolehan }}" 
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+                        <input
+                            type="date"
+                            name="tgl_perolehan"
+                            value="{{ old('tgl_perolehan', $barang->tgl_perolehan ? \Carbon\Carbon::parse($barang->tgl_perolehan)->format('Y-m-d') : '') }}"
+                            class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
+                        >
+                        @error('tgl_perolehan')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Kondisi</label>
                         <select name="kondisi" 
                                 class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
-                            <option value="Baik" {{ $barang->kondisi == 'Baik' ? 'selected' : '' }}>Baik</option>
-                            <option value="Rusak Ringan" {{ $barang->kondisi == 'Rusak Ringan' ? 'selected' : '' }}>Rusak Ringan</option>
-                            <option value="Rusak Berat" {{ $barang->kondisi == 'Rusak Berat' ? 'selected' : '' }}>Rusak Berat</option>
-                            <option value="Hilang" {{ $barang->kondisi == 'Hilang' ? 'selected' : '' }}>Hilang</option>
+                            @foreach (['Baik','Rusak Ringan','Rusak Berat','Hilang'] as $kondisi)
+                                <option value="{{ $kondisi }}" @selected(old('kondisi', $barang->kondisi) == $kondisi)>
+                                    {{ $kondisi }}
+                                </option>
+                            @endforeach
                         </select>
+                        @error('kondisi')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
+                    {{-- Nilai Perolehan --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Lokasi</label>
-                        <input type="text" name="lokasi" value="{{ old('lokasi', $barang->location->name ?? '') }}" 
-                               class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition">
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Nilai Perolehan</label>
+                        <!-- INPUT TAMPILAN -->
+                        <input
+                            type="text"
+                            id="nilai_perolehan_format"
+                            value="{{ old('nilai_perolehan') !== null 
+                                        ? number_format(old('nilai_perolehan'), 0, ',', '.') 
+                                        : number_format($barang->nilai_perolehan, 0, ',', '.') }}"
+                            class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
+                            oninput="formatRupiah(this, 'nilai_perolehan')"
+                            onblur="formatRupiah(this, 'nilai_perolehan')"
+                            onfocus="unformatForEdit(this)"
+                            autocomplete="off"
+                        >
+                        <!-- INPUT RAW (untuk dikirim ke server) -->
+                        <input 
+                            type="hidden" 
+                            name="nilai_perolehan" 
+                            id="nilai_perolehan" 
+                            value="{{ old('nilai_perolehan', (int)$barang->nilai_perolehan) }}"
+                        >
+                        @error('nilai_perolehan')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
-
-                    <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Nilai Perolehan</label>
-                    <!-- INPUT TAMPILAN -->
-                    <input
-                        type="text"
-                        id="nilai_perolehan_format"
-                        value="{{ number_format($barang->nilai_perolehan, 0, ',', '.') }}"
-                        class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
-                        oninput="formatRupiah(this, 'nilai_perolehan')"
-                        onblur="formatRupiah(this, 'nilai_perolehan')"
-                        onfocus="unformatForEdit(this)"
-                        autocomplete="off"
-                    >
-                    <!-- INPUT RAW (untuk dikirim ke server) -->
-                    <input 
-                        type="hidden" 
-                        name="nilai_perolehan" 
-                        id="nilai_perolehan" 
-                        value="{{ (int)$barang->nilai_perolehan }}"
-                    >
-                </div>
 
                 </div>
 
@@ -172,19 +181,12 @@
 
         // Format ulang saat halaman load (jika ada nilai awal)
         document.addEventListener('DOMContentLoaded', () => {
-            const fields = [
-                ['nilai_perolehan_format', 'nilai_perolehan'],
-                ['biaya_format', 'biaya']
-            ];
+            const display = document.getElementById('nilai_perolehan_format');
+            const hidden = document.getElementById('nilai_perolehan');
 
-            fields.forEach(([displayId, hiddenId]) => {
-                const display = document.getElementById(displayId);
-                const hidden = document.getElementById(hiddenId);
-
-                if (display && hidden && hidden.value) {
-                    display.value = hidden.value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                }
-            });
+            if (display && hidden && hidden.value) {
+                display.value = hidden.value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
         });
     </script>
 

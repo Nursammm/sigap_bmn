@@ -52,7 +52,7 @@
                         @click.outside="open=false"
                         class="absolute bottom-14 left-2 w-52 rounded-md bg-white py-1 text-gray-800 shadow-lg outline-1 outline-black/5">
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">Your profile</a>
-                        <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Settings</a>
+                        <a href="{{ route('users.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">Users</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="w-full text-left block px-4 py-2 text-sm hover:bg-gray-100">

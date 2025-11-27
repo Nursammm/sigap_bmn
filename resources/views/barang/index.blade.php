@@ -13,28 +13,28 @@
             <input
                 type="text"
                 id="customSearch"
-                placeholder="🔍 Cari nama, NUP, atau lokasi..."
-                class="w-full border border-gray-300 p-2.5 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                placeholder=" Cari nama, NUP, atau lokasi..."
+               class="w-[500px] border border-gray-300 p-2.5 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
             />
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-4">
             <select
                 id="filterKondisi"
                 class="border border-gray-300 p-2.5 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
-                <option value="">🔍 Filter Kondisi</option>
+                <option value="">Filter Kondisi</option>
                 <option value="Baik">Baik</option>
                 <option value="Rusak Ringan">Rusak Ringan</option>
                 <option value="Rusak Berat">Rusak Berat</option>
                 <option value="Hilang">Hilang</option>
             </select>
 
-            <!-- 🔽 Dropdown Sort -->
+            <!--  Dropdown Sort -->
             <select
                 id="shortData"
                 class="border border-gray-300 p-2.5 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
-                <option value="">↕️ Urutkan</option>
+                <option value="">Urutkan</option>
                 <option value="asc">Nama (A–Z)</option>
                 <option value="desc">Nama (Z–A)</option>
                 <option value="nilai_asc">Nilai Terendah</option>
@@ -43,13 +43,6 @@
                 <option value="tanggal_desc">Tanggal Baru</option>
             </select>
 
-            <!-- Tombol Export -->
-            <button
-                id="exportExcel"
-                class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm rounded-xl shadow-sm hover:bg-green-700 transition"
-            >
-                <i class="fas fa-file-export mr-2"></i> Export
-            </button>
 
             @auth
                 @if(auth()->user()->role === 'admin')
@@ -69,7 +62,7 @@
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-5">
             <h2 class="text-xl font-bold text-gray-800">
-                📦 Data Aset ({{ count($barangs) }})
+                📦 Data Asset ({{ count($barangs) }})
             </h2>
             <p class="text-sm text-gray-600 mt-2 md:mt-0">
                 Total Nilai:
@@ -78,98 +71,101 @@
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto rounded-xl border border-gray-200">
-            <table id="dataTable" class="min-w-full text-sm text-gray-700">
-                <thead class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs uppercase tracking-wide">
-                    <tr>
-                        <th class="px-3 py-3 text-left">No</th>
-                        <th class="px-3 py-3 text-left">Kode Sakter</th>
-                        <th class="px-3 py-3 text-left">Special Code</th>
-                        <th class="px-3 py-3 text-left">Kode Register</th>
-                        <th class="px-3 py-3 text-left">Kode Barang</th>
-                        <th class="px-3 py-3 text-left">NUP</th>
-                        <th class="px-3 py-3 text-left">Nama Barang</th>
-                        <th class="px-3 py-3 text-left">Merek</th>
-                        <th class="px-3 py-3 text-left">Tanggal</th>
-                        <th class="px-3 py-3 text-left">Nomor Seri</th>
-                        <th class="px-3 py-3 text-left">Kondisi</th>
-                        <th class="px-3 py-3 text-right">Nilai</th>
-                        <th class="px-3 py-3 text-center">QR</th>
-                        <th class="px-3 py-3 text-left">Lokasi</th>
-                        <th class="px-3 py-3 text-center">Aksi</th>
-                    </tr>
-                </thead>
+<div class="overflow-x-auto rounded-xl border border-gray-200">
+    <table id="dataTable" class="min-w-full text-sm text-gray-700">
+        <thead class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs uppercase tracking-wide">
+            <tr>
+                <th class="px-3 py-3 text-left">No</th>
+                <th class="px-3 py-3 text-left">Special Code</th>
+                <th class="px-3 py-3 text-left">Kode Register</th>
+                <th class="px-3 py-3 text-left">Kode Barang</th>
+                <th class="px-3 py-3 text-left">NUP</th>
+                <th class="px-3 py-3 text-left">Nama Barang</th>
+                <th class="px-3 py-3 text-left">Merek</th>
+                <th class="px-3 py-3 text-left">Tanggal</th>
+                <th class="px-3 py-3 text-left">Nomor Seri</th>
+                <th class="px-3 py-3 text-left">Kondisi</th>
+                <th class="px-3 py-3 text-right">Nilai</th>
+                <th class="px-3 py-3 text-center">QR</th>
+                <th class="px-3 py-3 text-left">Lokasi</th>
+                <th class="px-3 py-3 text-center">Aksi</th>
+            </tr>
+        </thead>
 
-                <tbody class="divide-y divide-gray-100">
-                    @foreach($barangs as $no => $barang)
-                        <tr class="hover:bg-gray-50 even:bg-gray-50/50">
-                            <td class="px-3 py-2">{{ $no + 1 }}</td>
-                            <td class="px-3 py-2">{{ $barang->kode_sakter }}</td>
-                            <td class="px-3 py-2">{{ $barang->special_code }}</td>
-                            <td class="px-3 py-2 font-mono text-xs">{{ $barang->kode_register }}</td>
-                            <td class="px-3 py-2">{{ $barang->kode_barang }}</td>
-                            <td class="px-3 py-2">{{ str_pad($barang->nup, 1, '0', STR_PAD_LEFT) }}</td>
-                            <td class="px-3 py-2 font-medium text-gray-900">{{ $barang->nama_barang }}</td>
-                            <td class="px-3 py-2">{{ $barang->merek ?? '-' }}</td>
-                            <td class="px-3 py-2">
-                                {{ $barang->tgl_perolehan ? \Carbon\Carbon::parse($barang->tgl_perolehan)->format('d/m/Y') : '-' }}
-                            </td>
+        <tbody class="divide-y divide-gray-100">
+            @foreach($barangs as $no => $barang)
+                <tr class="hover:bg-gray-50 even:bg-gray-50/50">
+                    <td class="px-3 py-2">{{ $no + 1 }}</td>
 
-                            <td class="px-3 py-2 ">{{ $barang->sn ?? '-' }}</td>
+                    <!-- HAPUS Kode Sakter -->
+                    <td class="px-3 py-2">{{ $barang->special_code }}</td>
 
-                            <td class="px-3 py-2">
-                                @php
-                                    $warna = match($barang->kondisi) {
-                                        'Baik' => 'bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-800',
-                                        'Rusak Ringan' => 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 hover:text-yellow-800',
-                                        'Rusak Berat' => 'bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800',
-                                        'Hilang' => 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-800',
-                                        default => 'bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-800',
-                                    };
-                                @endphp
-                                <span class="{{ $warna }} inline-flex items-center justify-center text-xs font-medium px-3 py-1 rounded-full transition-colors duration-200">
-                                    {{ $barang->kondisi ?? 'Baik' }}
-                                </span>
-                            </td>
+                    <td class="px-3 py-2 font-mono text-xs">{{ $barang->kode_register ?? '-'}}</td>
+                    <td class="px-3 py-2">{{ $barang->kode_barang }}</td>
+                    <td class="px-3 py-2">{{ str_pad($barang->nup, 1, '0', STR_PAD_LEFT) }}</td>
+                    <td class="px-3 py-2 font-medium text-gray-900">{{ $barang->nama_barang }}</td>
+                    <td class="px-3 py-2">{{ $barang->merek ?? '-' }}</td>
 
-                            <td class="px-3 py-2 text-right">
-                                <span class="inline-flex items-center">
-                                    <span class="mr-1 text-gray-500">Rp</span>
-                                    <span class="font-medium text-gray-900">
-                                        {{ number_format($barang->nilai_perolehan ?? 0, 0, ',', '.') }}
-                                    </span>
-                                </span>
-                            </td>
+                    <td class="px-3 py-2">
+                        {{ $barang->tgl_perolehan ? \Carbon\Carbon::parse($barang->tgl_perolehan)->format('d/m/Y') : '-' }}
+                    </td>
 
-                            <td class="px-3 py-2 text-center">
-                                <button type="button"
-                                    onclick="openQrModal(
-                                                '{{ $barang->id }}',
-                                                '{{ $barang->nama_barang }}',
-                                                '{{ $barang->kode_register }}',
-                                                '{{ $barang->alternatif_qr }}',
-                                                '{{ $barang->location->name ?? '-' }}'
-                                            )"
-                                    class="p-1.5 rounded-md border border-gray-300 hover:bg-gray-100 transition"
-                                    title="Lihat QR">
-                                    <i class="fas fa-qrcode text-gray-600"></i>
-                                </button>
-                            </td>
+                    <td class="px-3 py-2">{{ $barang->sn ?? '-' }}</td>
 
-                            <td class="px-6 py-2 whitespace-nowrap text-left">
-                                <span class="truncate block max-w-[150px]" title="{{ $barang->location->name ?? '-' }}">
-                                    {{ $barang->location->name ?? '-' }}
-                                </span>
-                            </td>
+                    <td class="px-3 py-2">
+                        @php
+                            $warna = match($barang->kondisi) {
+                                'Baik' => 'bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-800',
+                                'Rusak Ringan' => 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 hover:text-yellow-800',
+                                'Rusak Berat' => 'bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800',
+                                'Hilang' => 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-800',
+                                default => 'bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-800',
+                            };
+                        @endphp
+                        <span class="{{ $warna }} inline-flex items-center justify-center text-xs font-medium px-3 py-1 rounded-full">
+                            {{ $barang->kondisi ?? 'Baik' }}
+                        </span>
+                    </td>
 
-                            <td class="px-3 py-2 text-center">
-                                @include('barang.partials.actions', ['barang' => $barang])
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                    <td class="px-3 py-2 text-right">
+                        <span class="inline-flex items-center">
+                            <span class="mr-1 text-gray-500">Rp</span>
+                            <span class="font-medium text-gray-900">
+                                {{ number_format($barang->nilai_perolehan ?? 0, 0, ',', '.') }}
+                            </span>
+                        </span>
+                    </td>
+
+                    <td class="px-3 py-2 text-center">
+                        <button type="button"
+                            onclick="openQrModal(
+                                        '{{ $barang->id }}',
+                                        '{{ $barang->nama_barang }}',
+                                        '{{ $barang->kode_register }}',
+                                        '{{ $barang->alternatif_qr }}',
+                                        '{{ $barang->location->name ?? '-' }}'
+                                    )"
+                            class="p-1.5 rounded-md border border-gray-300 hover:bg-gray-100"
+                            title="Lihat QR">
+                            <i class="fas fa-qrcode text-gray-600"></i>
+                        </button>
+                    </td>
+
+                    <td class="px-6 py-2 whitespace-nowrap text-left">
+                        <span class="truncate block max-w-[150px]" title="{{ $barang->location->name ?? '-' }}">
+                            {{ $barang->location->name ?? '-' }}
+                        </span>
+                    </td>
+
+                    <td class="px-3 py-2 text-center">
+                        @include('barang.partials.actions', ['barang' => $barang])
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+
 
         @if($barangs instanceof \Illuminate\Contracts\Pagination\Paginator)
             <div class="mt-4">
@@ -203,6 +199,71 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+        <!-- =====================  CUSTOM STYLE DATATABLE (TIDAK MENGUBAH BAGIAN BAWAH) ===================== -->
+        <style>
+        /* WRAPPER */
+        .dataTables_wrapper {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* HEADER */
+        table.dataTable thead th {
+            background: #f1f5f9 !important;
+            color: #1f2937 !important;
+            font-weight: 600;
+            padding: 14px !important;
+            border-bottom: 2px solid #e5e7eb !important;
+        }
+
+        /* BODY ROW */
+        table.dataTable tbody td {
+            padding: 14px !important;
+        }
+        table.dataTable tbody tr {
+            background: #fff !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        table.dataTable tbody tr:hover {
+            background: #f8fafc !important;
+            transition: 0.2s;
+        }
+
+        /* PAGINATION */
+        .dataTables_paginate .paginate_button {
+            padding: 6px 12px !important;
+            margin: 0 3px !important;
+            border-radius: 8px !important;
+            background: #fff !important;
+            border: 1px solid #d1d5db !important;
+            color: #4b5563 !important;
+        }
+        .dataTables_paginate .paginate_button.current {
+            background: #2563eb !important;
+            color: white !important;
+            border-color: #2563eb !important;
+        }
+        .dataTables_paginate .paginate_button:hover {
+            background: #e5e7eb !important;
+            color: #111827 !important;
+        }
+
+        /* LENGTH */
+        .dataTables_length select {
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+        }
+
+        /* SEARCH */
+        .dataTables_filter input {
+            padding: 8px 12px !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 10px !important;
+        }
+        </style>
+        <!-- ================================================================================================ -->
+
         <script>
             $(document).ready(function () {
                 let table = $('#dataTable').DataTable({
@@ -222,7 +283,7 @@
                     columnDefs: [
                         { targets: [0], className: "text-center" },   // No
                         { targets: [10], className: "text-right" },   // Nilai
-                        { targets: [11, 14], orderable: false }       // QR & Aksi
+                        { targets: [11, 1], orderable: false }       // QR & Aksi
                     ]
                 });
 
@@ -260,11 +321,6 @@
                     table.order([columnIndex, orderDir]).draw();
                 });
 
-                // Export ke Excel (SheetJS)
-                $('#exportExcel').on('click', function () {
-                    let wb = XLSX.utils.table_to_book(document.getElementById('dataTable'), { sheet: "Data Barang" });
-                    XLSX.writeFile(wb, 'data_barang.xlsx');
-                });
             });
 
             // Modal QR

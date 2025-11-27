@@ -30,14 +30,38 @@
     @endif
 
     @if ($isAdmin)
-        <form action="{{ route('barang.destroy', $barang) }}"
-              method="POST"
-              onsubmit="return confirm('Yakin hapus')">
+        <!-- TOMBOL HAPUS (SweetAlert) -->
+        <button type="button"
+            class="text-red-600 hover:text-red-700"
+            title="Hapus"
+            onclick="deleteBarang('{{ $barang->id }}')">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+
+        <!-- FORM DELETE -->
+        <form id="delete-form-{{ $barang->id }}" action="{{ route('barang.destroy', $barang) }}" method="POST" class="hidden">
             @csrf
             @method('DELETE')
-            <button type="submit" class="text-red-600 hover:text-red-700" title="Hapus">
-                <i class="fas fa-trash-alt"></i>
-            </button>
         </form>
     @endif
 </div>
+
+<!-- SCRIPT SWEETALERT -->
+<script>
+function deleteBarang(id) {
+    Swal.fire({
+        title: "Yakin ingin menghapus?",
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Ya, hapus!",
+        cancelButtonText: "Batal"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    });
+}
+</script>

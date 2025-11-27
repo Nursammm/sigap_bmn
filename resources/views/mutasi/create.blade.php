@@ -54,21 +54,51 @@
             >
                 @csrf
 
-                {{-- Lokasi tujuan --}}
-                <div>
+                {{-- Lokasi tujuan: dropdown + Lainnya --}}
+                <div x-data="{ showOther: {{ old('lokasi_baru') ? 'true' : 'false' }} }">
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Lokasi Tujuan <span class="text-red-500">*</span>
                     </label>
-                    <input
-                        type="text"
+
+                    <select
                         name="lokasi"
-                        value="{{ old('lokasi') }}"
                         class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('lokasi') border-red-500 @enderror"
-                        placeholder="Contoh: Gedung Utama Lt. 2"
+                        @change="showOther = ($event.target.value === 'other')"
                     >
+                        <option value="">Pilih Lokasi Tujuan</option>
+
+                        @foreach($locations as $loc)
+                            <option value="{{ $loc->name }}"
+                                @selected(old('lokasi') === $loc->name)>
+                                {{ $loc->name }}
+                            </option>
+                        @endforeach
+
+                        <option value="other" @selected(old('lokasi') === 'other')>Lainnya…</option>
+                    </select>
+
                     @error('lokasi')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
+
+                    <div x-show="showOther" x-cloak class="mt-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Lokasi Baru
+                        </label>
+                        <input
+                            type="text"
+                            name="lokasi_baru"
+                            value="{{ old('lokasi_baru') }}"
+                            class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('lokasi_baru') border-red-500 @enderror"
+                            placeholder="Tulis lokasi tujuan baru…"
+                        >
+                        @error('lokasi_baru')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                        <p class="text-xs text-gray-500 mt-1">
+                            Pilih ini jika lokasi tujuan belum ada di daftar. Jika memilih lokasi dari daftar, tidak perlu mengisi lokasi baru.
+                        </p>
+                    </div>
                 </div>
 
                 {{-- Tanggal --}}
@@ -103,14 +133,6 @@
                     @enderror
                 </div>
 
-                {{-- Info sesuai role --}}
-                <div class="text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
-                    @if ($isAdmin)
-                        Mutasi ini akan langsung mengubah lokasi barang ke lokasi tujuan yang diisi.
-                    @else
-                        Permintaan mutasi akan dikirim ke Admin sebagai notifikasi. Barang belum berpindah sebelum disetujui Admin.
-                    @endif
-                </div>
 
                 {{-- Tombol aksi --}}
                 <div class="flex justify-end gap-2 pt-2">

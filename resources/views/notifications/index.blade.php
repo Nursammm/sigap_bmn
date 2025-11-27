@@ -1,3 +1,4 @@
+{{-- resources/views/notifications/index.blade.php --}}
 <x-layout>
     <x-slot name="title">Notifikasi</x-slot>
 
@@ -41,7 +42,7 @@
                     {{-- TOMBOL MASUK / KELUAR MODE HAPUS --}}
                     <button type="button"
                             class="text-xs px-3 py-1.5 rounded-full border border-rose-300 text-rose-600 bg-white hover:bg-rose-50"
-                            @click="deleteMode = !deleteMode; if(!deleteMode) selected = [];">
+                            @click="deleteMode = !deleteMode; if(!deleteMode) selected = []; ">
                         <span x-show="!deleteMode">Hapus</span>
                         <span x-show="deleteMode" x-cloak>Batal</span>
                     </button>
@@ -96,12 +97,12 @@
         <div class="space-y-3">
             @forelse($notifications as $n)
                 @php
-                    $t = $n->type;
-                    $d = $n->data ?? [];
+                    $t      = $n->type;
+                    $d      = $n->data ?? [];
                     $unread = is_null($n->read_at);
                 @endphp
 
-                {{-- ================= PERMINTAAN MUTASI (untuk ADMIN) ================= --}}
+                {{-- ================= PERMINTAAN MUTASI (info saja untuk ADMIN) ================= --}}
                 @if($t === \App\Notifications\MutasiRequestedNotification::class)
                     <div class="rounded-2xl border
                         {{ $unread ? 'border-blue-200 bg-blue-50/70' : 'border-gray-200 bg-white' }}
@@ -116,7 +117,7 @@
                                         </span>
                                     @else
                                         <span class="ml-2 text-[10px] inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 uppercase tracking-wide">
-                                            Selesai
+                                            Dibaca
                                         </span>
                                     @endif
                                 </div>
@@ -131,11 +132,30 @@
                                     Dari: {{ $d['from_name'] ?? '-' }} → Ke: {{ $d['to_name'] ?? '-' }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    Tanggal: {{ $d['tanggal'] ?? '-' }}
+                                    Tanggal diminta: {{ $d['tanggal'] ?? '-' }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    Diajukan oleh: {{ $d['requested_by_name'] ?? '-' }}
                                 </div>
                                 @if(!empty($d['catatan']))
                                     <div class="mt-1 text-xs text-gray-500">
-                                        Catatan: {{ $d['catatan'] }}
+                                        Catatan pengelola: {{ $d['catatan'] }}
+                                    </div>
+                                @endif
+
+                                {{-- Optional shortcut --}}
+                                @if(!empty($d['barang_id']))
+                                    <div class="mt-2 flex flex-wrap gap-2">
+                                        <a href="{{ route('barang.show', $d['barang_id']) }}"
+                                           class="px-3 py-1.5 text-xs rounded-full border border-gray-200 bg-white hover:bg-gray-50">
+                                            Lihat Detail Barang
+                                        </a>
+                                        @if($isAdmin)
+                                            <a href="{{ route('mutasi.create', $d['barang_id']) }}"
+                                               class="px-3 py-1.5 text-xs rounded-full bg-purple-600 text-white hover:bg-purple-700">
+                                                Buka Form Mutasi
+                                            </a>
+                                        @endif
                                     </div>
                                 @endif
                             </div>
@@ -156,8 +176,8 @@
                                     <span>Pilih</span>
                                 </label>
 
-                                {{-- ADMIN: tidak ada tombol tandai dibaca --}}
-                                @if($unread && !$isAdmin)
+                                {{-- tombol tandai dibaca (untuk semua role) --}}
+                                @if($unread)
                                     <form action="{{ route('notifications.read', $n->id) }}" method="POST">
                                         @csrf
                                         <button type="submit"
@@ -168,47 +188,6 @@
                                 @endif
                             </div>
                         </div>
-
-                        {{-- Tombol approve / reject hanya untuk ADMIN & satu kali (saat UNREAD) --}}
-                        @if($isAdmin && $unread)
-                            <div class="mt-3 grid gap-2 md:grid-cols-2">
-                                <form action="{{ route('mutasi.request.approve', $n->id) }}"
-                                      method="POST"
-                                      class="flex items-center gap-2">
-                                    @csrf
-                                    <input type="text"
-                                           name="note"
-                                           class="flex-1 border rounded-full px-3 py-2 text-xs"
-                                           placeholder="Catatan (opsional)">
-                                    <button
-                                        type="submit"
-                                        class="px-4 py-2 rounded-full bg-green-600 text-white text-xs font-semibold hover:bg-green-700"
-                                    >
-                                        Approve
-                                    </button>
-                                </form>
-
-                                <form action="{{ route('mutasi.request.reject', $n->id) }}"
-                                      method="POST"
-                                      class="flex items-center gap-2">
-                                    @csrf
-                                    <input type="text"
-                                           name="note"
-                                           class="flex-1 border rounded-full px-3 py-2 text-xs"
-                                           placeholder="Catatan (opsional)">
-                                    <button
-                                        type="submit"
-                                        class="px-4 py-2 rounded-full bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700"
-                                    >
-                                        Reject
-                                    </button>
-                                </form>
-                            </div>
-                        @elseif($isAdmin && !$unread)
-                            <div class="mt-3 text-xs text-gray-500 italic">
-                                Permintaan ini sudah diproses
-                            </div>
-                        @endif
                     </div>
 
                 {{-- ============ HASIL PERMINTAAN MUTASI (untuk PENGAJU) ============ --}}
@@ -245,7 +224,7 @@
                                 </div>
                                 @if(!empty($d['note']))
                                     <div class="mt-1 text-xs text-gray-500">
-                                        Catatan: {{ $d['note'] }}
+                                        Catatan admin: {{ $d['note'] }}
                                     </div>
                                 @endif
                             </div>
@@ -266,8 +245,7 @@
                                     <span>Pilih</span>
                                 </label>
 
-                                {{-- tandai dibaca hanya untuk bukan admin --}}
-                                @if($unread && !$isAdmin)
+                                @if($unread)
                                     <form action="{{ route('notifications.read', $n->id) }}" method="POST">
                                         @csrf
                                         <button type="submit"
@@ -287,36 +265,35 @@
                         p-4 shadow-sm">
                         <div class="flex justify-between items-start gap-3">
                             <div class="flex-1">
-                                    <div class="text-sm font-semibold text-gray-900">
-                                        Catatan Pemeliharaan
-                                        @if($unread)
-                                            <span class="ml-2 text-[10px] inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase tracking-wide">
-                                                Baru
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="mt-1 text-xs text-gray-700">
-                                        Barang:
-                                        <span class="font-semibold">{{ $d['barang_nama'] ?? '-' }}</span>
-                                        <span class="ml-1 text-[10px] text-gray-500">
+                                <div class="text-sm font-semibold text-gray-900">
+                                    Catatan Pemeliharaan
+                                    @if($unread)
+                                        <span class="ml-2 text-[10px] inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase tracking-wide">
+                                            Baru
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="mt-1 text-xs text-gray-700">
+                                    Barang:
+                                    <span class="font-semibold">{{ $d['barang_nama'] ?? '-' }}</span>
+                                    <span class="ml-1 text-[10px] text-gray-500">
                                         ({{ $d['kode_register'] ?? '-' }})
                                     </span>
+                                </div>
+                                <div class="text-xs text-gray-700">
+                                    Status: <span class="font-medium">{{ $d['status'] ?? '-' }}</span>
+                                </div>
+                                @if(!empty($d['message']))
+                                    <div class="mt-1 text-xs text-gray-600">
+                                        {{ $d['message'] }}
                                     </div>
-                                    <div class="text-xs text-gray-700">
-                                        Status: <span class="font-medium">{{ $d['status'] ?? '-' }}</span>
+                                @endif
+                                @if(!empty($d['admin_note']))
+                                    <div class="mt-1 text-xs text-gray-500">
+                                        Catatan:
+                                        <span class="italic">"{{ Str::limit($d['admin_note'], 120) }}"</span>
                                     </div>
-                                    @if(!empty($d['message']))
-                                        <div class="mt-1 text-xs text-gray-600">
-                                            {{ $d['message'] }}
-                                        </div>
-                                    @endif
-                                    @if(!empty($d['admin_note']))
-                                        <div class="mt-1 text-xs text-gray-500">
-                                            Catatan:
-                                            <span class="italic">"{{ Str::limit($d['admin_note'], 120) }}"</span>
-                                        </div>
-                                    @endif
-                                </a>
+                                @endif
                             </div>
 
                             <div class="flex flex-col items-end gap-1">
