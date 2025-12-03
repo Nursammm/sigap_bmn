@@ -15,8 +15,6 @@ class DashboardController extends Controller
         $asetRusakBerat = Barang::where('kondisi', 'Rusak Berat')->count();
         $perluPerbaikan = $asetRusakRingan + $asetRusakBerat;
         $nilaiTotalAset = Barang::sum('nilai_perolehan');
-        $growthBulan = 12; // Dummy, silakan ganti dengan perhitungan sesuai kebutuhan
-        $growthTahun = 8.2; // Dummy, silakan ganti dengan perhitungan sesuai kebutuhan
 
         return view('dashboard', [
             'title' => 'Dashboard',
@@ -26,8 +24,6 @@ class DashboardController extends Controller
             'asetRusakBerat' => $asetRusakBerat,
             'perluPerbaikan' => $perluPerbaikan,
             'nilaiTotalAset' => $nilaiTotalAset,
-            'growthBulan' => $growthBulan,
-            'growthTahun' => $growthTahun,
         ]);
     }
 }

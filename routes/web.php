@@ -23,7 +23,6 @@ use App\Notifications\MutasiRequestResolvedNotification;
 Route::redirect('/', '/dashboard');
 
 
-/* ============= Hanya untuk user login + verified ============= */
 Route::middleware(['auth', 'verified'])->group(function () {
 
     /* ---------------- Dashboard ---------------- */

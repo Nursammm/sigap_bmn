@@ -2,67 +2,94 @@
     <x-slot name="title">Daftar Barang</x-slot>
 
     @php
-        $totalNilai = ($barangs instanceof \Illuminate\Contracts\Pagination\Paginator)
+        $totalNilai = ($barangs)
             ? $barangs->getCollection()->sum('nilai_perolehan')
             : collect($barangs)->sum('nilai_perolehan');
     @endphp
 
-    <!-- Toolbar -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div class="flex-1">
-            <input
-                type="text"
-                id="customSearch"
-                placeholder=" Cari nama, NUP, atau lokasi..."
-               class="w-[500px] border border-gray-300 p-2.5 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-            />
-        </div>
-        <div class="flex items-center gap-4">
-            <select
-                id="filterKondisi"
-                class="border border-gray-300 p-2.5 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-                <option value="">Filter Kondisi</option>
-                <option value="Baik">Baik</option>
-                <option value="Rusak Ringan">Rusak Ringan</option>
-                <option value="Rusak Berat">Rusak Berat</option>
-                <option value="Hilang">Hilang</option>
-            </select>
+    <form
+            method="GET"
+            action="{{ route('barang.index') }}"
+            class="bg-white border border-slate-200 rounded-2xl shadow-sm px-4 py-4 md:px-6 md:py-5 space-y-4"
+        >
+            <div class="grid gap-4 md:grid-cols-12 md:items-end">
+                <div class="flex flex-col gap-1 md:col-span-5">
+                    <label for="customSearch" class="text-xs font-medium text-slate-600">
+                        Pencarian (nama, NUP, atau lokasi)
+                    </label>
+                    <div class="relative">
+                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fas fa-search text-xs"></i>
+                        </span>
+                        <input
+                            type="text"
+                            name="q"
+                            id="customSearch"
+                            placeholder="Cari"
+                            value="{{ request('q') }}"
+                            oninput="this.form.submit()"
+                            class="w-full border border-slate-300 pl-8 pr-3 py-2.5 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        />
+                    </div>
+                </div>
 
-            <!--  Dropdown Sort -->
-            <select
-                id="shortData"
-                class="border border-gray-300 p-2.5 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-                <option value="">Urutkan</option>
-                <option value="asc">Nama (A–Z)</option>
-                <option value="desc">Nama (Z–A)</option>
-                <option value="nilai_asc">Nilai Terendah</option>
-                <option value="nilai_desc">Nilai Tertinggi</option>
-                <option value="tanggal_asc">Tanggal Lama</option>
-                <option value="tanggal_desc">Tanggal Baru</option>
-            </select>
-
-
-            @auth
-                @if(auth()->user()->role === 'admin')
-                    <a
-                        href="{{ route('barang.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm rounded-xl shadow-sm hover:bg-blue-700 transition"
+                <div class="flex flex-col gap-1 md:col-span-3">
+                    <label for="filterKondisi" class="text-xs font-medium text-slate-600">
+                        Filter kondisi barang
+                    </label>
+                    <select
+                        name="kondisi"
+                        id="filterKondisi"
+                        onchange="this.form.submit()"
+                        class="w-full border border-slate-300 px-3 py-2.5 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     >
-                        <i class="fas fa-plus mr-2"></i> Tambah Aset
-                    </a>
-            @endif
-            @endauth
+                        <option value="">Semua kondisi</option>
+                        <option value="Baik" {{ request('kondisi') == 'Baik' ? 'selected' : '' }}>Baik</option>
+                        <option value="Rusak Ringan" {{ request('kondisi') == 'Rusak Ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                        <option value="Rusak Berat" {{ request('kondisi') == 'Rusak Berat' ? 'selected' : '' }}>Rusak Berat</option>
+                        <option value="Hilang" {{ request('kondisi') == 'Hilang' ? 'selected' : '' }}>Hilang</option>
+                    </select>
+                </div>
 
+                <div class="flex flex-col gap-1 md:col-span-2">
+                    <label for="shortData" class="text-xs font-medium text-slate-600">
+                        Urutkan data
+                    </label>
+                    <select
+                        name="sort"
+                        id="shortData"
+                        onchange="this.form.submit()"
+                        class="w-full border border-slate-300 px-3 py-2.5 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    >
+                        <option value="">Default</option>
+                        <option value="asc"          {{ request('sort') == 'asc' ? 'selected' : '' }}>Nama (A–Z)</option>
+                        <option value="desc"         {{ request('sort') == 'desc' ? 'selected' : '' }}>Nama (Z–A)</option>
+                        <option value="nilai_asc"    {{ request('sort') == 'nilai_asc' ? 'selected' : '' }}>Nilai Terendah</option>
+                        <option value="nilai_desc"   {{ request('sort') == 'nilai_desc' ? 'selected' : '' }}>Nilai Tertinggi</option>
+                        <option value="tanggal_asc"  {{ request('sort') == 'tanggal_asc' ? 'selected' : '' }}>Tanggal Lama</option>
+                        <option value="tanggal_desc" {{ request('sort') == 'tanggal_desc' ? 'selected' : '' }}>Tanggal Baru</option>
+                    </select>
+                </div>
+
+                @auth
+                    @if(auth()->user()->role === 'admin')
+                        <div class="flex md:col-span-2 md:justify-end md:items-end">
+                            <a
+                                href="{{ route('barang.create') }}"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm rounded-xl shadow-sm hover:bg-blue-700 transition"
+                            >
+                                <i class="fas fa-plus mr-2"></i> Tambah Aset
+                            </a>
+                        </div>
+                    @endif
+                @endauth
         </div>
-    </div>
+    </form>
 
-    <!-- Card -->
     <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-5">
             <h2 class="text-xl font-bold text-gray-800">
-                📦 Data Asset ({{ count($barangs) }})
+                Data Asset ({{ $barangs->total() }})
             </h2>
             <p class="text-sm text-gray-600 mt-2 md:mt-0">
                 Total Nilai:
@@ -70,102 +97,112 @@
             </p>
         </div>
 
-        <!-- Table -->
-<div class="overflow-x-auto rounded-xl border border-gray-200">
-    <table id="dataTable" class="min-w-full text-sm text-gray-700">
-        <thead class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs uppercase tracking-wide">
-            <tr>
-                <th class="px-3 py-3 text-left">No</th>
-                <th class="px-3 py-3 text-left">Special Code</th>
-                <th class="px-3 py-3 text-left">Kode Register</th>
-                <th class="px-3 py-3 text-left">Kode Barang</th>
-                <th class="px-3 py-3 text-left">NUP</th>
-                <th class="px-3 py-3 text-left">Nama Barang</th>
-                <th class="px-3 py-3 text-left">Merek</th>
-                <th class="px-3 py-3 text-left">Tanggal</th>
-                <th class="px-3 py-3 text-left">Nomor Seri</th>
-                <th class="px-3 py-3 text-left">Kondisi</th>
-                <th class="px-3 py-3 text-right">Nilai</th>
-                <th class="px-3 py-3 text-center">QR</th>
-                <th class="px-3 py-3 text-left">Lokasi</th>
-                <th class="px-3 py-3 text-center">Aksi</th>
-            </tr>
-        </thead>
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+            <table id="dataTable" class="min-w-full text-sm text-gray-700">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 text-xs uppercase tracking-wide">
+                    <tr>
+                        <th class="px-3 py-3 text-left">No</th>
+                        <th class="px-3 py-3 text-left">Special Code</th>
+                        <th class="px-3 py-3 text-left">Kode Register</th>
+                        <th class="px-3 py-3 text-left">Kode Barang</th>
+                        <th class="px-3 py-3 text-left">NUP</th>
+                        <th class="px-3 py-3 text-left">Nama Barang</th>
+                        <th class="px-3 py-3 text-left">Merek</th>
+                        <th class="px-3 py-3 text-left">Tanggal</th>
+                        <th class="px-3 py-3 text-left">Nomor Seri</th>
+                        <th class="px-3 py-3 text-left">Kondisi</th>
+                        <th class="px-3 py-3 text-right">Nilai</th>
+                        <th class="px-3 py-3 text-center">QR</th>
+                        <th class="px-3 py-3 text-left">Lokasi</th>
+                        <th class="px-3 py-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
 
-        <tbody class="divide-y divide-gray-100">
-            @foreach($barangs as $no => $barang)
-                <tr class="hover:bg-gray-50 even:bg-gray-50/50">
-                    <td class="px-3 py-2">{{ $no + 1 }}</td>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($barangs as $no => $barang)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-3 py-2 align-top">
+                                {{ ($barangs->firstItem() ?? 0) + $no }}
+                            </td>
 
-                    <!-- HAPUS Kode Sakter -->
-                    <td class="px-3 py-2">{{ $barang->special_code }}</td>
+                            <td class="px-3 py-2">{{ $barang->special_code }}</td>
+                            <td class="px-3 py-2 font-mono text-xs">{{ $barang->kode_register ?? '-' }}</td>
+                            <td class="px-3 py-2">{{ $barang->kode_barang }}</td>
 
-                    <td class="px-3 py-2 font-mono text-xs">{{ $barang->kode_register ?? '-'}}</td>
-                    <td class="px-3 py-2">{{ $barang->kode_barang }}</td>
-                    <td class="px-3 py-2">{{ str_pad($barang->nup, 1, '0', STR_PAD_LEFT) }}</td>
-                    <td class="px-3 py-2 font-medium text-gray-900">{{ $barang->nama_barang }}</td>
-                    <td class="px-3 py-2">{{ $barang->merek ?? '-' }}</td>
+                            <td class="px-3 py-2 align-top">
+                                {{ str_pad($barang->nup, 1, '0', STR_PAD_LEFT) }}
+                            </td>
 
-                    <td class="px-3 py-2">
-                        {{ $barang->tgl_perolehan ? \Carbon\Carbon::parse($barang->tgl_perolehan)->format('d/m/Y') : '-' }}
-                    </td>
+                            <td class="px-3 py-2 align-top font-medium text-gray-900 whitespace-normal">
+                                {{ $barang->nama_barang }}
+                            </td>
 
-                    <td class="px-3 py-2">{{ $barang->sn ?? '-' }}</td>
+                            <td class="px-3 py-2 align-top whitespace-normal">
+                                {{ $barang->merek ?? '-' }}
+                            </td>
 
-                    <td class="px-3 py-2">
-                        @php
-                            $warna = match($barang->kondisi) {
-                                'Baik' => 'bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-800',
-                                'Rusak Ringan' => 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 hover:text-yellow-800',
-                                'Rusak Berat' => 'bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800',
-                                'Hilang' => 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-800',
-                                default => 'bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-800',
-                            };
-                        @endphp
-                        <span class="{{ $warna }} inline-flex items-center justify-center text-xs font-medium px-3 py-1 rounded-full">
-                            {{ $barang->kondisi ?? 'Baik' }}
-                        </span>
-                    </td>
+                            <td class="px-3 py-2 align-top">
+                                {{ $barang->tgl_perolehan ? \Carbon\Carbon::parse($barang->tgl_perolehan)->format('d/m/Y') : '-' }}
+                            </td>
+                            <td class="px-3 py-2">{{ $barang->sn ?? '-' }}</td>
 
-                    <td class="px-3 py-2 text-right">
-                        <span class="inline-flex items-center">
-                            <span class="mr-1 text-gray-500">Rp</span>
-                            <span class="font-medium text-gray-900">
-                                {{ number_format($barang->nilai_perolehan ?? 0, 0, ',', '.') }}
-                            </span>
-                        </span>
-                    </td>
+                            <td class="px-3 py-2 align-top">
+                                @php
+                                    $warna = match($barang->kondisi) {
+                                        'Baik' => 'bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-800',
+                                        'Rusak Ringan' => 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 hover:text-yellow-800',
+                                        'Rusak Berat' => 'bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800',
+                                        'Hilang' => 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-800',
+                                        default => 'bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-800',
+                                    };
+                                @endphp
+                                <span class="{{ $warna }} inline-flex items-center justify-center text-xs font-medium px-3 py-1 rounded-full">
+                                    {{ $barang->kondisi ?? 'Baik' }}
+                                </span>
+                            </td>
 
-                    <td class="px-3 py-2 text-center">
-                        <button type="button"
-                            onclick="openQrModal(
-                                        '{{ $barang->id }}',
-                                        '{{ $barang->nama_barang }}',
-                                        '{{ $barang->kode_register }}',
-                                        '{{ $barang->alternatif_qr }}',
-                                        '{{ $barang->location->name ?? '-' }}'
-                                    )"
-                            class="p-1.5 rounded-md border border-gray-300 hover:bg-gray-100"
-                            title="Lihat QR">
-                            <i class="fas fa-qrcode text-gray-600"></i>
-                        </button>
-                    </td>
+                            <td class="px-3 py-2 align-top text-right">
+                                <span class="inline-flex items-center">
+                                    <span class="mr-1 text-gray-500">Rp</span>
+                                    <span class="font-medium text-gray-900">
+                                        {{ number_format($barang->nilai_perolehan ?? 0, 0, ',', '.') }}
+                                    </span>
+                                </span>
+                            </td>
 
-                    <td class="px-6 py-2 whitespace-nowrap text-left">
-                        <span class="truncate block max-w-[150px]" title="{{ $barang->location->name ?? '-' }}">
-                            {{ $barang->location->name ?? '-' }}
-                        </span>
-                    </td>
+                            <td class="px-3 py-2 align-top text-center">
+                                <button type="button"
+                                    onclick="openQrModal(
+                                                '{{ $barang->id }}',
+                                                '{{ $barang->nama_barang }}',
+                                                '{{ $barang->kode_register }}',
+                                                '{{ $barang->alternatif_qr }}',
+                                                '{{ $barang->location->name ?? '-' }}'
+                                            )"
+                                    class="p-1.5 rounded-md border border-gray-300 hover:bg-gray-100"
+                                    title="Lihat QR">
+                                    <i class="fas fa-qrcode text-gray-600"></i>
+                                </button>
+                            </td>
 
-                    <td class="px-3 py-2 text-center">
-                        @include('barang.partials.actions', ['barang' => $barang])
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
+                            <td class="px-3 py-2 align-top whitespace-normal">
+                                {{ $barang->location->name ?? '-' }}
+                            </td>
 
+                            <td class="px-3 py-2 align-top text-center">
+                                @include('barang.partials.actions', ['barang' => $barang])
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="14" class="px-3 py-6 text-center text-gray-500">
+                                Tidak ada data yang ditemukan.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
         @if($barangs instanceof \Illuminate\Contracts\Pagination\Paginator)
             <div class="mt-4">
@@ -174,7 +211,6 @@
         @endif
     </div>
 
-    <!-- Modal QR -->
     <div id="qr-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-all scale-95 opacity-0" id="qr-box">
             <div class="px-6 pt-6 text-center">
@@ -193,155 +229,66 @@
     </div>
 
     @push('scripts')
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-        <!-- =====================  CUSTOM STYLE DATATABLE (TIDAK MENGUBAH BAGIAN BAWAH) ===================== -->
         <style>
-        /* WRAPPER */
-        .dataTables_wrapper {
-            font-family: 'Inter', sans-serif;
-        }
+            #dataTable thead th {
+                background: #f1f5f9;
+                color: #1f2937;
+                font-weight: 600;
+                padding: 14px;
+                border-bottom: 2px solid #e5e7eb;
+                font-size: 0.75rem;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
 
-        /* HEADER */
-        table.dataTable thead th {
-            background: #f1f5f9 !important;
-            color: #1f2937 !important;
-            font-weight: 600;
-            padding: 14px !important;
-            border-bottom: 2px solid #e5e7eb !important;
-        }
+            #dataTable tbody td {
+                padding: 10px 12px;
+            }
 
-        /* BODY ROW */
-        table.dataTable tbody td {
-            padding: 14px !important;
-        }
-        table.dataTable tbody tr {
-            background: #fff !important;
-            border-radius: 12px !important;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-        }
-        table.dataTable tbody tr:hover {
-            background: #f8fafc !important;
-            transition: 0.2s;
-        }
+            #dataTable tbody tr {
+                background: #ffffff;
+                transition: background 0.15s ease;
+            }
 
-        /* PAGINATION */
-        .dataTables_paginate .paginate_button {
-            padding: 6px 12px !important;
-            margin: 0 3px !important;
-            border-radius: 8px !important;
-            background: #fff !important;
-            border: 1px solid #d1d5db !important;
-            color: #4b5563 !important;
-        }
-        .dataTables_paginate .paginate_button.current {
-            background: #2563eb !important;
-            color: white !important;
-            border-color: #2563eb !important;
-        }
-        .dataTables_paginate .paginate_button:hover {
-            background: #e5e7eb !important;
-            color: #111827 !important;
-        }
+            #dataTable tbody tr:nth-child(even) {
+                background: #f9fafb;
+            }
 
-        /* LENGTH */
-        .dataTables_length select {
-            padding: 6px 10px;
-            border-radius: 10px;
-            border: 1px solid #d1d5db;
-        }
-
-        /* SEARCH */
-        .dataTables_filter input {
-            padding: 8px 12px !important;
-            border: 1px solid #d1d5db !important;
-            border-radius: 10px !important;
-        }
+            #dataTable tbody tr:hover {
+                background: #f8fafc;
+            }
         </style>
-        <!-- ================================================================================================ -->
 
         <script>
-            $(document).ready(function () {
-                let table = $('#dataTable').DataTable({
-                    responsive: true,
-                    pageLength: 10,
-                    lengthMenu: [5, 10, 25, 50, 100],
-                    searching: true,
-                    ordering: false,
-                    order: [], // default biarkan apa adanya
-                    dom: 'lrtip',
-                    language: {
-                        lengthMenu: "Tampilkan _MENU_ entri",
-                        info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
-                        paginate: { next: "›", previous: "‹" },
-                        zeroRecords: "Tidak ada data yang ditemukan",
-                    },
-                    columnDefs: [
-                        { targets: [0], className: "text-center" },   // No
-                        { targets: [10], className: "text-right" },   // Nilai
-                        { targets: [11, 1], orderable: false }       // QR & Aksi
-                    ]
-                });
 
-                // Pencarian custom
-                $('#customSearch').on('keyup', function () {
-                    table.search(this.value).draw();
-                });
-
-                // Filter kondisi (kolom 9)
-                $('#filterKondisi').on('change', function () {
-                    table.column(9).search(this.value).draw();
-                });
-
-                // Urutkan
-                $('#shortData').on('change', function () {
-                    const val = $(this).val();
-                    let columnIndex = 6; // default: Nama Barang
-                    let orderDir = 'asc';
-
-                    if (val === 'desc') {
-                        orderDir = 'desc';
-                    } else if (val === 'nilai_asc') {
-                        columnIndex = 10; orderDir = 'asc';
-                    } else if (val === 'nilai_desc') {
-                        columnIndex = 10; orderDir = 'desc';
-                    } else if (val === 'tanggal_asc') {
-                        columnIndex = 8; orderDir = 'asc';
-                    } else if (val === 'tanggal_desc') {
-                        columnIndex = 8; orderDir = 'desc';
-                    } else {
-                        table.order([]).draw();
-                        return;
-                    }
-
-                    table.order([columnIndex, orderDir]).draw();
-                });
-
-            });
-
-            // Modal QR
             function openQrModal(id, nama, kode_register, alternatif_qr, lokasi) {
-                const qrData = alternatif_qr;
-                const encodedData = encodeURIComponent(qrData);
+                const encodedData = encodeURIComponent(alternatif_qr || '');
 
                 document.getElementById('qr-title').innerText = "QR Code - " + nama;
                 document.getElementById('qr-image').src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodedData;
-                document.getElementById('qr-kode_register').innerText = "Kode Register: " + kode_register;
-                document.getElementById('qr-location').innerText = "Lokasi: " + lokasi;
+                document.getElementById('qr-kode_register').innerText = "Kode Register: " + (kode_register || '-');
+                document.getElementById('qr-location').innerText = "Lokasi: " + (lokasi || '-');
+
                 let modal = document.getElementById('qr-modal');
                 let box = document.getElementById('qr-box');
-                modal.classList.remove('hidden'); modal.classList.add('flex');
-                setTimeout(() => { box.classList.remove('scale-95','opacity-0'); box.classList.add('scale-100','opacity-100'); }, 50);
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => {
+                    box.classList.remove('scale-95','opacity-0');
+                    box.classList.add('scale-100','opacity-100');
+                }, 50);
             }
+
             function closeQrModal() {
                 let modal = document.getElementById('qr-modal');
                 let box = document.getElementById('qr-box');
                 box.classList.add('scale-95','opacity-0');
-                setTimeout(() => { modal.classList.remove('flex'); modal.classList.add('hidden'); }, 200);
+                setTimeout(() => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                }, 200);
             }
         </script>
     @endpush

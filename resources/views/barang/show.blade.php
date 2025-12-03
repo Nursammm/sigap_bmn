@@ -5,7 +5,6 @@
         <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-3xl border border-gray-200">
 
             @php
-                // Normalisasi foto_url supaya selalu berupa array
                 $raw = $barang->foto_url;
 
                 if (is_array($raw)) {
@@ -131,13 +130,13 @@
             <div class="pt-6 flex justify-end gap-3 mt-6 border-t">
                 <a href="{{ route('barang.index') }}" 
                     class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium shadow hover:bg-gray-300 transition">
-                    ← Kembali
+                    Kembali
                 </a>
                 @auth
                     @if(auth()->user()->role === 'admin')
                     <a href="{{ route('barang.edit', $barang->id) }}" 
                         class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium shadow hover:bg-blue-700 transition">
-                        ✏️ Edit
+                        Edit
                     </a>
                 @endif
                 @endauth

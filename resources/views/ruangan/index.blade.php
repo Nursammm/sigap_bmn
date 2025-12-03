@@ -1,8 +1,6 @@
-{{-- resources/views/ruangan/index.blade.php --}}
 <x-layout>
     <x-slot name="title">Daftar Barang Ruangan</x-slot>
 
-    {{-- kalau di layout belum ada --}}
     <style>
         [x-cloak] { display: none !important; }
     </style>
@@ -10,22 +8,17 @@
     <div class="max-w-7xl mx-auto">
         <div class="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-100">
 
-            {{-- Header & Filter --}}
             <div class="px-6 md:px-8 py-5 border-b bg-gray-50"
                  x-data="{ openExport:false }">
                 <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-
-                    {{-- FORM FILTER --}}
                     <form id="filterForm" method="GET" action="{{ route('ruangan.index') }}"
                           class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end w-full">
-
-                        {{-- Ruangan --}}
                         <div class="flex flex-col min-w-[180px] max-w-[240px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Ruangan</label>
                             <select name="lokasi"
                                     class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"
                                     onchange="document.getElementById('filterForm').submit()">
-                                <option value="">— Semua Ruangan —</option>
+                                <option value="" @selected(($lokasiParam ?? '') === '' || ($lokasiParam ?? '') === null)>- Semua Ruangan -</option>
                                 @foreach ($locations as $loc)
                                     <option value="{{ $loc->id }}" @selected($lokasiId == $loc->id)>
                                         {{ $loc->name }} ({{ $loc->barangs_count }})
@@ -34,16 +27,14 @@
                             </select>
                         </div>
 
-                        {{-- Cari --}}
                         <div class="flex flex-col min-w-[180px] max-w-[250px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
                             <input type="text" name="q" value="{{ $search }}"
-                                   placeholder="Nama/kode/merek…"
+                                   placeholder="Nama/kode/merek"
                                    class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"
                                    oninput="debouncedSubmitFilter()">
                         </div>
 
-                        {{-- Kondisi --}}
                         <div class="flex flex-col min-w-[150px] max-w-[180px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kondisi</label>
                             <select name="kondisi"
@@ -58,51 +49,41 @@
                             </select>
                         </div>
 
-                        {{-- Urutkan --}}
                         <div class="flex flex-col min-w-[180px] max-w-[220px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Urutkan</label>
                             <select name="sort"
                                     class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"
                                     onchange="document.getElementById('filterForm').submit()">
-
+                                @php $sort = request('sort'); @endphp
                                 <option value="">Default</option>
-
-                                {{-- Tanggal Perolehan --}}
-                                <option value="tgl_perolehan_desc" @selected(request('sort') === 'tgl_perolehan_desc')}>
-                                    Tanggal Perolehan — Terbaru
+                                <option value="tgl_perolehan_desc" @selected($sort === 'tgl_perolehan_desc')>
+                                    Tanggal Perolehan → Terbaru
                                 </option>
-                                <option value="tgl_perolehan_asc" @selected(request('sort') === 'tgl_perolehan_asc')}>
-                                    Tanggal Perolehan — Terlama
+                                <option value="tgl_perolehan_asc" @selected($sort === 'tgl_perolehan_asc')>
+                                    Tanggal Perolehan → Terlama
                                 </option>
-
-                                {{-- Nama Barang --}}
-                                <option value="nama_asc" @selected(request('sort') === 'nama_asc')}>
-                                    Nama Barang — A ↦ Z
+                                <option value="nama_asc" @selected($sort === 'nama_asc')>
+                                    Nama Barang → A - Z
                                 </option>
-                                <option value="nama_desc" @selected(request('sort') === 'nama_desc')}>
-                                    Nama Barang — Z ↦ A
+                                <option value="nama_desc" @selected($sort === 'nama_desc')>
+                                    Nama Barang → Z - A
                                 </option>
-
-                                {{-- Kode Barang --}}
-                                <option value="kode_asc" @selected(request('sort') === 'kode_asc')}>
-                                    Kode Barang — Kecil → Besar
+                                <option value="kode_asc" @selected($sort === 'kode_asc')>
+                                    Kode Barang → Kecil - Besar
                                 </option>
-                                <option value="kode_desc" @selected(request('sort') === 'kode_desc')}>
-                                    Kode Barang — Besar → Kecil
+                                <option value="kode_desc" @selected($sort === 'kode_desc')>
+                                    Kode Barang → Besar - Kecil
                                 </option>
-
-                                {{-- Tanggal Input --}}
-                                <option value="input_desc" @selected(request('sort') === 'input_desc')}>
-                                    Tanggal Input — Terbaru
+                                <option value="input_desc" @selected($sort === 'input_desc')>
+                                    Tanggal Input → Terbaru
                                 </option>
-                                <option value="input_asc" @selected(request('sort') === 'input_asc')}>
-                                    Tanggal Input — Terlama
+                                <option value="input_asc" @selected($sort === 'input_asc')>
+                                    Tanggal Input → Terlama
                                 </option>
                             </select>
                         </div>
                     </form>
 
-                    {{-- DROPDOWN EXPORT --}}
                     <div class="flex justify-end md:ml-4">
                         <div class="relative">
                             <button type="button"
@@ -123,7 +104,6 @@
                                 </svg>
                             </button>
 
-                            {{-- Menu dropdown --}}
                             <div x-cloak
                                  x-show="openExport"
                                  x-transition
@@ -141,7 +121,6 @@
                     </div>
                 </div>
 
-                {{-- Lokasi aktif --}}
                 <div class="mt-4 text-sm text-gray-600">
                     @if ($activeLocation)
                         Menampilkan barang di ruangan:
@@ -152,7 +131,6 @@
                 </div>
             </div>
 
-            {{-- Statistik --}}
             <div class="px-6 md:px-8 py-5 border-b">
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                     <div class="rounded-lg border bg-white p-3 text-center">
@@ -178,7 +156,6 @@
                 </div>
             </div>
 
-            {{-- Tabel --}}
             <div class="px-6 md:px-8 py-6">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -220,7 +197,7 @@
                                             };
                                         @endphp
                                         <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $badge }}">
-                                            {{ $b->kondisi ?? '—' }}
+                                            {{ $b->kondisi ?? '' }}
                                         </span>
                                     </td>
                                     <td class="px-3 py-2">
@@ -229,7 +206,7 @@
                                     <td class="px-3 py-2">
                                         {{ number_format((float) $b->nilai_perolehan, 0, ',', '.') }}
                                     </td>
-                                    <td class="px-3 py-2">{{ optional($b->location)->name ?? '—' }}</td>
+                                    <td class="px-3 py-2">{{ optional($b->location)->name ?? '' }}</td>
 
                                     <td class="px-3 py-2 text-center">
                                     <button type="button"
@@ -238,7 +215,7 @@
                                             '{{ $b->nama_barang }}',
                                             '{{ $b->kode_register }}',
                                             '{{ $b->alternatif_qr }}',
-                                            '{{ optional($b->location)->name ?? '—' }}'
+                                            '{{ optional($b->location)->name ?? '' }}'
                                         )"
                                         class="p-1.5 rounded-md border border-gray-300 hover:bg-gray-100 shadow-sm"
                                         title="Lihat QR">
@@ -289,7 +266,6 @@
         </div>
     </div>
     
-        <!-- Modal QR -->
     <div id="qr-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-all scale-95 opacity-0" id="qr-box">
             <div class="px-6 pt-6 text-center">
@@ -307,7 +283,6 @@
         </div>
     </div>
 
-{{-- Modal QR --}}
 <script>
     function openQrModal(id, nama, kode_register, alternatif_qr, lokasi) {
         const qrData = alternatif_qr;
@@ -348,8 +323,6 @@
     }
 </script>
 
-
-    {{-- Auto-submit untuk input Cari --}}
     <script>
         let filterTimer;
         function debouncedSubmitFilter() {
@@ -360,3 +333,4 @@
         }
     </script>
 </x-layout>
+

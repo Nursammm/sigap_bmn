@@ -6,8 +6,12 @@
                     p-8 rounded-3xl shadow-lg">
 
             <!-- Logo -->
-            <div class="flex justify-center mb-5">
-                <img src="{{ asset('storage/gap2.png') }}" alt="Logo" class="w-19 h-18 drop-shadow-md">
+            <div class="flex justify-center mb-6">
+                <img
+                    src="{{ asset('storage/gap2.png') }}"
+                    alt="Logo"
+                    class="w-28 h-24 md:w-32 md:h-28 drop-shadow-md"
+                >
             </div>
 
             <!-- Judul -->

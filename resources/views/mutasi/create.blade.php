@@ -1,4 +1,3 @@
-{{-- resources/views/mutasi/create.blade.php --}}
 <x-layout>
     <x-slot name="title">Mutasi Barang</x-slot>
 
@@ -8,9 +7,7 @@
     @endphp
 
     <div class="max-w-xl mx-auto mt-10">
-        {{-- Kartu utama --}}
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-            {{-- Header --}}
             <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
                 <div>
                     <h1 class="text-lg font-semibold">
@@ -25,7 +22,6 @@
                 </span>
             </div>
 
-            {{-- Info barang --}}
             <div class="px-6 pt-5 pb-3 bg-gray-50 border-b border-gray-100 text-sm text-gray-700">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-1">
                     <div>
@@ -43,18 +39,16 @@
                 </div>
             </div>
 
-            {{-- Form --}}
             <form
                 action="{{ $isAdmin
-                    ? route('mutasi.store', $barang)        {{-- admin: mutasi langsung --}}
-                    : route('mutasi.request', $barang)      {{-- pengelola: ajukan mutasi --}}
+                    ? route('mutasi.store', $barang)     
+                    : route('mutasi.request', $barang)   
                 }}"
                 method="POST"
                 class="px-6 pb-6 pt-4 space-y-4"
             >
                 @csrf
 
-                {{-- Lokasi tujuan: dropdown + Lainnya --}}
                 <div x-data="{ showOther: {{ old('lokasi_baru') ? 'true' : 'false' }} }">
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Lokasi Tujuan <span class="text-red-500">*</span>
@@ -101,7 +95,6 @@
                     </div>
                 </div>
 
-                {{-- Tanggal --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Tanggal Mutasi <span class="text-red-500">*</span>
@@ -117,7 +110,6 @@
                     @enderror
                 </div>
 
-                {{-- Catatan --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Catatan
@@ -134,7 +126,6 @@
                 </div>
 
 
-                {{-- Tombol aksi --}}
                 <div class="flex justify-end gap-2 pt-2">
                     <a href="{{ route('barang.index') }}"
                        class="px-4 py-2 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50">

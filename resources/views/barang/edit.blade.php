@@ -8,7 +8,6 @@
                 @csrf
                 @method('PUT')
 
-                <!-- Grid 2 kolom -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
                     <div>
@@ -117,8 +116,6 @@
 
                     <input type="file" name="foto_url[]" id="foto_url" multiple accept=".jpg,.jpeg,.png"
                            class="hidden">
-
-                    <span class="block text-xs text-gray-500 mt-2">Anda dapat memilih lebih dari satu foto.</span>
                 </div>
 
                 <!-- Tombol -->

@@ -3,10 +3,8 @@
     style="background-color:#08376B;"
     :class="sidebarOpen ? 'md:w-64' : 'md:w-0 overflow-hidden'">
 
-    <!-- Pakai flex kolom penuh -->
     <div class="flex h-full flex-col text-white">
 
-        {{-- BAGIAN ATAS (Logo + Navigasi) --}}
         <div>
             <div class="flex items-center justify-center h-28 py-6">
                 <img class="w-40 h-40 object-contain" src="{{ asset('storage/gap2.png') }}" alt="Logo">
@@ -17,15 +15,12 @@
             </div>
         </div>
 
-        {{-- SPACER: dorong sisa konten ke bawah --}}
         <div class="mt-auto"></div>
 
-        {{-- NOTIFIKASI: tepat di atas profil --}}
         <div class="px-4 mb-2">
             <x-notifications.bell-deletion />
         </div>
 
-        {{-- PROFIL --}}
         <div class="border-t border-white/10">
             <div class="px-4 py-3">
                 <div class="relative" x-data="{ open:false }" @keydown.escape.stop="open=false">
@@ -52,7 +47,9 @@
                         @click.outside="open=false"
                         class="absolute bottom-14 left-2 w-52 rounded-md bg-white py-1 text-gray-800 shadow-lg outline-1 outline-black/5">
                         <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">Your profile</a>
+                        @admin
                         <a href="{{ route('users.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">Users</a>
+                        @endadmin
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="w-full text-left block px-4 py-2 text-sm hover:bg-gray-100">

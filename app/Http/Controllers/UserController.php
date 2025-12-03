@@ -74,8 +74,6 @@ class UserController extends Controller
         }
 
         $user->update($data);
-
-        // ⬅️ Kembali ke halaman sebelumnya dengan notifikasi berhasil diubah
         return redirect()
             ->back()
             ->with('success', 'Data pengguna berhasil diubah');

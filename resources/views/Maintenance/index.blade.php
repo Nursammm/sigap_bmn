@@ -1,11 +1,9 @@
-{{-- resources/views/maintenance/index.blade.php --}}
 <x-layout>
     <x-slot name="title">Pemeliharaan Barang</x-slot>
 
     <div class="max-w-7xl mx-auto" x-data>
         <div class="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden">
 
-            {{-- HEADER + FILTER --}}
             <div class="px-6 md:px-8 py-5 border-b bg-gray-50">
                 <div class="flex items-start justify-between gap-4">
                     <div>
@@ -102,8 +100,6 @@
                                 $canComplete = auth()->user()?->role === 'admin' && in_array($m->status, ['Disetujui','Proses'], true);
                                 $rowNumber   = method_exists($items,'firstItem') ? $items->firstItem() + $loop->index : $loop->iteration;
 
-                                // === Multi-foto: normalisasi ke array URL ===
-                                // Bisa datang dari kolom JSON "photos" (array) atau kolom lama "photo_path" (string).
                                 $rawPhotos = [];
                                 if (!empty($m->photos)) {
                                     $rawPhotos = is_array($m->photos) ? $m->photos : (array) $m->photos;

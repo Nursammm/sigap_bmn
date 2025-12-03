@@ -18,9 +18,6 @@ class MaintenanceController extends Controller
         $this->middleware('auth');
     }
 
-    // =====================================================================
-    // INDEX
-    // =====================================================================
     public function index(Request $request)
     {
         $status   = $request->query('status');
@@ -55,7 +52,6 @@ class MaintenanceController extends Controller
         $items = $base->paginate(15)->appends($request->query());
         $totalBiaya = (clone $base)->sum('biaya');
 
-        // daftar barang unik yang punya data maintenance (untuk popup PDF)
         $barangList = Maintenance::with('barang')
             ->whereNotNull('barang_id')
             ->select('barang_id')
@@ -72,13 +68,8 @@ class MaintenanceController extends Controller
     }
 
 
-
-    // =====================================================================
-    // FORM CREATE
-    // =====================================================================
     public function create(Barang $barang)
 {
-    // Cegah pengelola buka form jika masih ada pengajuan open
     $isAdmin = Auth::user()->role === 'admin';
 
     $hasOpen = Maintenance::open()
@@ -95,17 +86,13 @@ class MaintenanceController extends Controller
 }
 
 
-    // =====================================================================
-    // STORE (PENGAJUAN) — dengan upload foto
-    // =====================================================================
     public function store(Request $request, Barang $barang)
 {
     $isAdmin = Auth::user()->role === 'admin';
 
-    // Guard anti duplikat (race-condition safe)
     $hasOpen = Maintenance::open()
         ->where('barang_id', $barang->id)
-        ->lockForUpdate() // opsional, jika pakai transaksi
+        ->lockForUpdate()
         ->exists();
 
     if (!$isAdmin && $hasOpen) {
@@ -152,9 +139,6 @@ class MaintenanceController extends Controller
         ->with('ok', 'Pengajuan pemeliharaan tersimpan.');
 }
 
-    // =====================================================================
-    // FORM EDIT
-    // =====================================================================
     public function edit(Maintenance $maintenance)
     {
         $this->authorizeUpdate($maintenance);
@@ -165,9 +149,6 @@ class MaintenanceController extends Controller
         ]);
     }
 
-    // =====================================================================
-    // UPDATE (EDIT) — admin bisa isi catatan & ganti foto
-    // =====================================================================
     public function update(Request $request, Maintenance $maintenance)
     {
         $this->authorizeUpdate($maintenance);
@@ -224,7 +205,6 @@ class MaintenanceController extends Controller
             $requester->notify(new MaintenanceNoteNotification($maintenance)); 
         } }
 
-        // foto lama (array)
         $existing = $maintenance->photo_path ?? [];
 
         if (!empty($data['remove_photos'])) {
@@ -249,9 +229,7 @@ class MaintenanceController extends Controller
             ->route('maintenance.index', request()->query())
             ->with('ok','Pemeliharaan diperbarui.');
     }
-    // =====================================================================
-    // APPROVE — admin dapat memberi catatan (opsional)
-    // =====================================================================
+
     public function approve(Request $request, Maintenance $maintenance)
     {
         $this->authorizeAdmin();
@@ -266,7 +244,6 @@ class MaintenanceController extends Controller
             'admin_note'  => $data['admin_note'] ?? null,
         ]);
 
-        // opsional: kirim notifikasi juga di sini
         $requester = $maintenance->requester;
         if ($requester && $requester->id !== Auth::id()) {
             $requester->notify(new MaintenanceNoteNotification($maintenance));
@@ -275,9 +252,6 @@ class MaintenanceController extends Controller
         return back()->with('ok', 'Pengajuan disetujui.');
     }
 
-    // =====================================================================
-    // REJECT — admin wajib isi alasan (catatan)
-    // =====================================================================
     public function reject(Request $request, Maintenance $maintenance)
     {
         $this->authorizeAdmin();
@@ -293,7 +267,6 @@ class MaintenanceController extends Controller
             'approved_by' => $user->id,
         ]);
 
-        // KIRIM NOTIFIKASI KE PENGELOLA (REQUESTER)
         $requester = $maintenance->requester;
         if ($requester && $requester->id !== $user->id) {
             $requester->notify(new MaintenanceNoteNotification($maintenance));
@@ -302,9 +275,6 @@ class MaintenanceController extends Controller
         return back()->with('ok', 'Pengajuan ditolak.');
     }
 
-    // =====================================================================
-    // COMPLETE — tandai selesai
-    // =====================================================================
     public function complete(Maintenance $maintenance)
     {
         $this->authorizeAdmin();
@@ -323,7 +293,6 @@ class MaintenanceController extends Controller
             ]);
         }
 
-        // opsional: kirim notifikasi selesai
         $requester = $maintenance->requester;
         if ($requester && $requester->id !== Auth::id()) {
             $requester->notify(new MaintenanceNoteNotification($maintenance));
@@ -332,9 +301,6 @@ class MaintenanceController extends Controller
         return back()->with('ok','Pengajuan ditandai selesai.');
     }
 
-    // =====================================================================
-    // DESTROY
-    // =====================================================================
     public function destroy(Maintenance $maintenance)
     {
         $this->authorizeAdmin();
@@ -348,9 +314,6 @@ class MaintenanceController extends Controller
         return back()->with('ok', 'Data pemeliharaan dihapus.');
     }
 
-    // =====================================================================
-    // Helpers auth
-    // =====================================================================
     protected function authorizeAdmin(): void
     {
         abort_unless(Auth::user()?->role === 'admin', 403);

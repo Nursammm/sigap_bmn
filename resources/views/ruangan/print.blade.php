@@ -1,4 +1,3 @@
-{{-- resources/views/ruangan/print.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -15,7 +14,6 @@
             font-size: 10pt;
         }
 
-        /* --- GLOBAL TABLE STYLES --- */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -23,12 +21,11 @@
         }
 
         th, td {
-            border: 1px solid #ccc; /* Garis grid abu-abu seperti Excel */
+            border: 1px solid #ccc; 
             padding: 4px 6px;
             vertical-align: middle;
         }
 
-        /* --- HEADER SECTION (Grid Style) --- */
         .header-table td {
             font-size: 9pt;
         }
@@ -46,24 +43,24 @@
         .label-cell {
             font-weight: bold;
             width: 150px;
-            background-color: #f9f9f9; /* Sedikit abu agar terlihat seperti label */
+            background-color: #f9f9f9;
         }
 
         .label-right {
             font-weight: bold;
             background-color: #f9f9f9;
-            width: 110px;          /* lebih kecil dari label biasa */
+            width: 110px;      
         }
 
         .colon-tight {
-            width: 10px;           /* sempit, jadi dekat dengan teks */
+            width: 10px;     
             text-align: center;
             padding-left: 0;
             padding-right: 0;
         }
 
         .value-cell {
-            /* Area isi */
+
         }
 
         .qr-cell {
@@ -72,9 +69,8 @@
             width: 100px;
         }
 
-        /* --- DATA TABLE SECTION --- */
         .data-table th {
-            background-color: #0047b3; /* Biru tua persis gambar */
+            background-color: #0047b3; 
             color: #ffffff;
             text-align: center;
             font-weight: bold;
@@ -84,21 +80,18 @@
 
         .data-table td {
             font-size: 9pt;
-            border: 1px solid #000; /* Garis tabel data lebih hitam tegas */
+            border: 1px solid #000; 
         }
 
-        /* Alignment Helpers */
         .text-center { text-align: center; }
         .text-left   { text-align: left; }
-        
-        /* Links style */
+
         a.link-blue {
             color: #0000EE;
             text-decoration: underline;
             cursor: pointer;
         }
 
-        /* Lebar Kolom (Disesuaikan proporsinya) */
         .col-no { width: 30px; }
         .col-kode { width: 90px; }
         .col-nama { width: auto; }
@@ -114,42 +107,35 @@
 </head>
 <body>
 
-    {{-- HEADER: Grid Layout persis Excel --}}
     <table class="header-table">
-        {{-- Baris 1: Judul --}}
         <tr>
             <td colspan="6" class="header-title">DAFTAR BARANG RUANGAN</td>
         </tr>
 
-        {{-- Baris 2: Pemilik Ruangan --}}
         <tr>
             <td class="label-cell">PEMILIK RUANGAN</td>
             <td class="text-center" style="width:10px;">:</td>
             <td colspan="4"></td>
         </tr>
 
-        {{-- Baris 3: UAPB --}}
         <tr>
             <td class="label-cell">UAPB</td>
             <td class="text-center">:</td>
             <td colspan="4">LEMBAGA PENYIARAN PUBLIK TVRI</td>
         </tr>
 
-        {{-- Baris 4: UAPB-E1 --}}
         <tr>
             <td class="label-cell">UAPB-E1</td>
             <td class="text-center">:</td>
             <td colspan="4">LPP TVRI</td>
         </tr>
 
-        {{-- Baris 5: Nama UAKPB --}}
         <tr>
             <td class="label-cell">NAMA UAKPB</td>
             <td class="text-center">:</td>
             <td colspan="4">TVRI STASIUN SULAWESI TENGAH</td>
         </tr>
 
-        {{-- Baris 6: Kode UAKPB (kiri) + NAMA RUANGAN (kanan) --}}
         <tr>
             <td class="label-cell">KODE UAKPB</td>
             <td class="text-center">:</td>
@@ -181,7 +167,6 @@
         </tr>
     </table>
 
-    {{-- TABEL DATA BARANG --}}
         <table class="data-table">
             <thead>
                 <tr>

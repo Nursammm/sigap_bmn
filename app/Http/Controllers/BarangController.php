@@ -11,30 +11,73 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class BarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $barangs = Barang::with('location')->get();
+        $q       = trim((string) $request->query('q', ''));
+        $kondisi = $request->query('kondisi');
+        $sort    = $request->query('sort');
+
+        $query = Barang::with('location');
+
+        if ($q !== '') {
+            $query->where(function ($qq) use ($q) {
+                $qq->where('nama_barang', 'like', "%{$q}%")
+                   ->orWhere('nup', 'like', "%{$q}%")
+                   ->orWhereHas('location', function ($qLoc) use ($q) {
+                       $qLoc->where('name', 'like', "%{$q}%");
+                   });
+            });
+        }
+
+        if (!empty($kondisi)) {
+            $query->where('kondisi', $kondisi);
+        }
+
+        switch ($sort) {
+            case 'asc': 
+                $query->orderBy('nama_barang', 'asc');
+                break;
+            case 'desc':      
+                $query->orderBy('nama_barang', 'desc');
+                break;
+            case 'nilai_asc':   
+                $query->orderBy('nilai_perolehan', 'asc');
+                break;
+            case 'nilai_desc':  
+                $query->orderBy('nilai_perolehan', 'desc');
+                break;
+            case 'tanggal_asc': 
+                $query->orderBy('tgl_perolehan', 'asc');
+                break;
+            case 'tanggal_desc': 
+                $query->orderBy('tgl_perolehan', 'desc');
+                break;
+            default:
+                $query->orderBy('id', 'desc');
+                break;
+        }
+
+        $barangs = $query->paginate(25)->appends(request()->query());
+
         return view('barang.index', compact('barangs'));
     }
 
     public function create()
     {
-        // Ambil lokasi
         $locations = Location::orderBy('name')->get(['id', 'name']);
 
-        // Ambil pasangan nama_barang -> kode_barang dari data yang sudah ada
         $nameCodeMap = Barang::select('nama_barang', 'kode_barang')
             ->whereNotNull('nama_barang')
             ->whereNotNull('kode_barang')
             ->distinct()
             ->orderBy('nama_barang')
             ->get()
-            ->pluck('kode_barang', 'nama_barang'); // hasil: ['Nama Barang' => 'KODE123', ...]
+            ->pluck('kode_barang', 'nama_barang');
 
         return view('barang.create', [
             'title'        => 'Tambah Barang',
             'locations'    => $locations,
-            'nameCodeMap'  => $nameCodeMap, // untuk JS auto-fill
+            'nameCodeMap'  => $nameCodeMap,
         ]);
     }
 
@@ -46,14 +89,11 @@ class BarangController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // tidak ada lagi 'kategori'
             'nama_barang'     => 'required|string|max:255',
             'kode_barang'     => 'nullable|string|max:100',
             'merek'           => 'nullable|string|max:255',
-
             'location_id'     => 'nullable',
             'lokasi_baru'     => 'nullable|string|max:255',
-
             'keterangan'      => 'nullable|string|max:255',
             'tgl_perolehan'   => 'nullable|date',
             'nilai_perolehan' => 'nullable|numeric|min:0',
@@ -61,18 +101,13 @@ class BarangController extends Controller
             'kode_sakter'     => 'nullable|string|max:100',
             'kode_register'   => 'nullable|string|max:100',
             'sn'              => 'nullable|string|max:100',
-
             'foto_url'        => 'nullable|array',
             'foto_url.*'      => 'image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        /**
-         * ==================== LOGIKA LOKASI ====================
-         */
         $locationId = $validated['location_id'] ?? null;
 
         if ($locationId === 'other') {
-            // Kalau user memilih "Lainnya", wajib isi lokasi_baru
             $request->validate([
                 'lokasi_baru' => 'required|string|max:255',
             ]);
@@ -80,27 +115,15 @@ class BarangController extends Controller
             $location = Location::firstOrCreate(['name' => $request->lokasi_baru]);
             $locationId = $location->id;
         } elseif ($locationId) {
-            // kalau pilih salah satu dari dropdown, pakai itu saja
-            // tidak perlu apa-apa
         } else {
-            // Tidak pilih apapun di dropdown
             if ($request->filled('lokasi_baru')) {
-                // kalau dia tetap mengisi lokasi_baru, buat lokasi baru
                 $location = Location::firstOrCreate(['name' => $request->lokasi_baru]);
                 $locationId = $location->id;
             } else {
-                // benar-benar kosong -> lokasi optional
                 $locationId = null;
             }
         }
 
-        /**
-         * ==================== AUTO-FILL KODE BARANG ====================
-         * - Jika form sudah mengisi kode_barang -> pakai itu (manual).
-         * - Jika kosong: cek apakah sudah pernah ada barang dengan nama yang sama.
-         *   Kalau ada, pakai kode_barang dari data lama.
-         *   Kalau tetap tidak ada, paksa user isi manual.
-         */
         $kodeBarang = $validated['kode_barang'] ?? null;
 
         if (!$kodeBarang) {
@@ -116,17 +139,11 @@ class BarangController extends Controller
             ])->withInput();
         }
 
-        /**
-         * ==================== HITUNG NUP BERDASARKAN KODE BARANG ====================
-         */
         $latestNup = Barang::where('kode_barang', $kodeBarang)->max('nup') ?? 0;
         $nup       = $latestNup + 1;
 
         $specialCode = $kodeBarang . str_pad($nup, 1, '0', STR_PAD_LEFT);
 
-        /**
-         * ==================== UPLOAD MULTI FOTO ====================
-         */
         $gambarPath = [];
         if ($request->hasFile('foto_url')) {
             foreach ($request->file('foto_url') as $file) {
@@ -134,9 +151,6 @@ class BarangController extends Controller
             }
         }
 
-        /**
-         * ==================== SIMPAN BARANG ====================
-         */
         $barang = Barang::create([
             // tidak ada lagi 'kategori_id'
             'nama_barang'     => $validated['nama_barang'],
@@ -169,11 +183,7 @@ class BarangController extends Controller
             'barang'    => $barang,
         ]);
     }
-    /*
-     * ==========================================================
-     * UPDATE BARANG — SUDAH MENDUKUNG MULTIPLE FOTO
-     * ==========================================================
-     */
+
     public function update(Request $request, Barang $barang)
     {
         $validated = $request->validate([
@@ -185,17 +195,12 @@ class BarangController extends Controller
             'kode_sakter'     => 'nullable|string|max:100',
             'sn'              => 'nullable|string|max:100',
             'tgl_perolehan'   => 'nullable|date',
-
-            // Multiple file
             'foto_url'        => 'nullable|array',
             'foto_url.*'      => 'image|mimes:jpg,jpeg,png|max:2048',
 
             'existing_photos' => 'nullable|array',
         ]);
 
-        /**
-         * ============== UPDATE FIELD BARANG ==============
-         */
         $barang->fill([
             'nama_barang'     => $validated['nama_barang'],
             'kode_barang'     => $validated['kode_barang'],
@@ -207,16 +212,10 @@ class BarangController extends Controller
             'tgl_perolehan'   => $validated['tgl_perolehan'] ?? null,
         ]);
 
-        // Re-generate special_code & alternatif_qr
         $barang->special_code = $barang->kode_barang . str_pad($barang->nup, 1, '0', STR_PAD_LEFT);
         $barang->alternatif_qr = ($barang->kode_sakter ?? '') . '*' .
             $barang->kode_barang . '*' . str_pad($barang->nup, 1, '0', STR_PAD_LEFT);
 
-        // kode_register biarkan apa adanya (kalau kamu mau logic lain, tinggal tambah)
-
-        /**
-         * ============== MULTIPLE FOTO (tambah tanpa menghapus lama) ==============
-         */
         $currentPhotos = $barang->foto_url ?? [];
 
         if ($request->hasFile('foto_url')) {

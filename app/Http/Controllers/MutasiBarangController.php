@@ -17,8 +17,6 @@ class MutasiBarangController extends Controller
         $this->middleware(['auth','verified']);
     }
 
-    /* ===================== FORM MUTASI ===================== */
-
     public function create(Barang $barang)
     {
         return view('mutasi.create', [
@@ -27,25 +25,20 @@ class MutasiBarangController extends Controller
         ]);
     }
 
-    /* ===================== ADMIN: MUTASI LANGSUNG ===================== */
-
     public function store(Request $request, Barang $barang)
     {
-        // simpan lokasi awal (bisa null)
         $request->merge(['from_location_id' => $barang->location_id]);
 
         $data = $request->validate([
-            'lokasi'            => ['required','string','max:255'],   // dropdown: nama lokasi atau "other"
-            'lokasi_baru'       => ['nullable','string','max:255'],   // diisi jika pilih "Lainnya…"
+            'lokasi'            => ['required','string','max:255'], 
+            'lokasi_baru'       => ['nullable','string','max:255'],
             'tanggal'           => ['required','date'],
             'catatan'           => ['nullable','string','max:1000'],
             'from_location_id'  => ['nullable','exists:locations,id'],
         ]);
 
-        // Tentukan nama lokasi tujuan
         $lokasiRaw = trim($data['lokasi']);
         if ($lokasiRaw === 'other') {
-            // wajib isi lokasi_baru
             $request->validate([
                 'lokasi_baru' => ['required','string','max:255'],
             ]);
@@ -53,18 +46,14 @@ class MutasiBarangController extends Controller
         } else {
             $lokasiNama = $lokasiRaw;
         }
-
-        // Cari / buat lokasi tujuan di tabel locations
         $toLocation = Location::firstOrCreate(['name' => $lokasiNama]);
 
-        // Cegah mutasi ke lokasi yang sama
         if ((int) $toLocation->id === (int) $barang->location_id) {
             return back()
                 ->withErrors(['lokasi' => 'Lokasi tujuan tidak boleh sama dengan lokasi saat ini.'])
                 ->withInput();
         }
 
-        // Catat riwayat mutasi
         MutasiBarang::create([
             'barang_id'        => $barang->id,
             'from_location_id' => $data['from_location_id'],
@@ -74,13 +63,10 @@ class MutasiBarangController extends Controller
             'catatan'          => $data['catatan'] ?? null,
         ]);
 
-        // Update lokasi barang
         $barang->update(['location_id' => $toLocation->id]);
 
         return redirect()->route('barang.index')->with('success','Mutasi lokasi tersimpan.');
     }
-
-    /* ===================== RIWAYAT MUTASI ===================== */
 
     public function index()
     {
@@ -92,21 +78,18 @@ class MutasiBarangController extends Controller
         return view('mutasi.index', compact('items','totalBarangs'));
     }
 
-    /* ===================== PENGELOLA: MENGAJUKAN MUTASI ===================== */
 
     public function requestMutasi(Request $request, Barang $barang)
     {
         $data = $request->validate([
-            'lokasi'      => ['required','string','max:255'],   // nama lokasi atau "other"
-            'lokasi_baru' => ['nullable','string','max:255'],   // jika pilih "Lainnya…"
+            'lokasi'      => ['required','string','max:255'], 
+            'lokasi_baru' => ['nullable','string','max:255'],  
             'tanggal'     => ['required','date'],
             'catatan'     => ['nullable','string','max:2000'],
         ]);
 
-        // Lokasi saat ini (nama)
         $currentName = trim(optional($barang->location)->name ?? '');
 
-        // Tentukan nama lokasi tujuan
         $lokasiRaw = trim($data['lokasi']);
         if ($lokasiRaw === 'other') {
             $request->validate([
@@ -117,7 +100,6 @@ class MutasiBarangController extends Controller
             $toName = $lokasiRaw;
         }
 
-        /* 1) CEGAH LOKASI TUJUAN SAMA (berdasarkan nama, case-insensitive) */
         if ($currentName !== '' && strcasecmp($currentName, $toName) === 0) {
             return back()
                 ->withErrors([
@@ -126,7 +108,6 @@ class MutasiBarangController extends Controller
                 ->withInput();
         }
 
-        /* 2) CEGAH PERMINTAAN MUTASI YANG MASIH PENDING */
         $pending = DatabaseNotification::where('type', MutasiRequestedNotification::class)
             ->whereNull('read_at')
             ->whereJsonContains('data->barang_id', (int) $barang->id)
@@ -141,7 +122,6 @@ class MutasiBarangController extends Controller
                 ->withInput();
         }
 
-        /* 3) KIRIM NOTIFIKASI KE ADMIN */
         $payload = [
             'type'              => 'mutasi.request',
             'barang_id'         => (int) $barang->id,
@@ -162,7 +142,6 @@ class MutasiBarangController extends Controller
             ->with('success','Permintaan mutasi dikirim. Menunggu persetujuan Admin.');
     }
 
-    /* ===================== ADMIN: APPROVE REQUEST ===================== */
 
     public function approveRequest(Request $request, string $notificationId)
     {
@@ -182,7 +161,6 @@ class MutasiBarangController extends Controller
         $barang = Barang::findOrFail($data['barang_id']);
 
         DB::transaction(function () use ($data, $barang, $notif, $user, $validated) {
-            // Lokasi tujuan dari notifikasi (sudah berupa nama lokasi final)
             $toLoc = Location::firstOrCreate(['name' => trim($data['to_name'])]);
 
             MutasiBarang::create([
@@ -198,7 +176,6 @@ class MutasiBarangController extends Controller
 
             $notif->markAsRead();
 
-            // Tandai semua notifikasi pending untuk barang + pengaju yang sama sebagai sudah diproses
             DatabaseNotification::where('type', MutasiRequestedNotification::class)
                 ->whereNull('read_at')
                 ->whereJsonContains('data->barang_id', (int) $data['barang_id'])
@@ -224,8 +201,6 @@ class MutasiBarangController extends Controller
         return back()->with('success','Permintaan mutasi disetujui.');
     }
 
-    /* ===================== ADMIN: REJECT REQUEST ===================== */
-
     public function rejectRequest(Request $request, string $notificationId)
     {
         /** @var \App\Models\User|null $user */
@@ -244,7 +219,6 @@ class MutasiBarangController extends Controller
 
         $notif->markAsRead();
 
-        // tandai seluruh request mutasi untuk barang + pengaju itu sebagai selesai
         DatabaseNotification::where('type', MutasiRequestedNotification::class)
             ->whereNull('read_at')
             ->whereJsonContains('data->barang_id', (int) $data['barang_id'])

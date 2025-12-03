@@ -16,12 +16,9 @@
                             id="nama_barang"
                             value="{{ old('nama_barang') }}"
                             list="namaBarangList"
-                            placeholder="Ketik atau pilih nama barang…"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
                         >
-
-                        {{-- daftar nama barang dari database (mapping nama -> kode) --}}
                         <datalist id="namaBarangList">
                             @foreach(($nameCodeMap ?? []) as $nama => $kode)
                                 <option value="{{ $nama }}"></option>
@@ -120,7 +117,6 @@
                         @enderror
                     </div>
 
-                    {{-- Lokasi (dropdown + opsi Lainnya) --}}
                     <div x-data="{ showOther: {{ old('lokasi_baru') ? 'true' : 'false' }} }">
                         <label class="block text-sm font-medium text-gray-600 mb-1">Lokasi</label>
 
@@ -154,7 +150,6 @@
                         </div>
                     </div>
 
-                    {{-- Kondisi --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Kondisi</label>
                         <select name="kondisi"
@@ -167,7 +162,6 @@
                         @error('kondisi')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
-                    {{-- Keterangan --}}
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-600 mb-1">Keterangan</label>
                         <textarea name="keterangan" rows="3"
@@ -175,11 +169,10 @@
                         @error('keterangan')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                     </div>
 
-                    {{-- Upload Foto (custom UI, multiple) --}}
                     <div class="md:col-span-2">
                         <div class="mb-2">
                             <label class="block text-sm font-medium text-gray-600 mb-1">
-                                Foto Barang (opsional, bisa lebih dari satu)
+                                Foto Barang (opsional)
                             </label>
 
                             <div class="flex items-center gap-3">
@@ -209,7 +202,7 @@
                                    ">
 
                             <span class="block text-xs text-gray-500 mt-2">
-                                Bisa pilih beberapa file sekaligus. Format: jpg, jpeg, png. Maksimal 2MB per file.
+                                Format: jpg, jpeg, png. Maksimal 2MB.
                             </span>
                         </div>
 
@@ -220,27 +213,24 @@
                         @endif
                     </div>
 
-                </div> {{-- end grid --}}
+                </div>
 
-                {{-- Tombol --}}
                 <div class="mt-6 flex justify-end gap-3">
                     <button type="submit"
                             class="flex items-center px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-                        <i class="fas fa-save mr-2"></i> Simpan
+                        Simpan
                     </button>
                     <a href="{{ route('barang.index') }}"
                        class="flex items-center px-5 py-2 bg-gray-200 text-gray-700 rounded-lg shadow hover:bg-gray-300 transition">
-                        <i class="fas fa-times mr-2"></i> Batal
+                        Batal
                     </a>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- AUTO-FILL KODE BARANG BERDASARKAN NAMA BARANG --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // mapping dari controller: { "Nama Barang": "KODE123", ... }
             const nameToCode = @json($nameCodeMap ?? []);
 
             const namaInput = document.getElementById('nama_barang');
@@ -250,25 +240,17 @@
                 namaInput.addEventListener('change', function () {
                     const nama = this.value;
                     if (nameToCode[nama]) {
-                        // jika nama sudah pernah ada di DB, isi otomatis kode_barang
                         kodeInput.value = nameToCode[nama];
                     }
-                    // jika tidak ada di mapping, biarkan kosong/isi manual oleh user
                 });
             }
         });
     </script>
 
-    {{-- script untuk nilai perolehan --}}
     <script>
         function formatRupiahNP(el) {
-            // Hilangkan semua titik dan koma
             let angka = el.value.replace(/\./g, '').replace(/,/g, '');
-
-            // Simpan angka asli ke hidden input
             document.getElementById('nilai_perolehan').value = angka;
-
-            // Format ribuan
             el.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
     </script>

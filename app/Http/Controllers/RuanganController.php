@@ -5,26 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\{Barang, Location};
 use Barryvdh\DomPDF\Facade\Pdf;
-use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Exports\BarangExport;
 
 class RuanganController extends Controller
 {
     public function index(Request $request)
     {
-        $lokasiId = (int) $request->query('lokasi');
-        $search   = trim((string) $request->query('q', ''));
-        $kondisi  = $request->query('kondisi');
-        $sort     = $request->query('sort');
+        $lokasiParam = $request->query('lokasi');
+        $lokasiId    = is_numeric($lokasiParam) ? (int) $lokasiParam : null;
+        $search      = trim((string) $request->query('q', ''));
+        $kondisi     = $request->query('kondisi');
+        $sort        = $request->query('sort');
 
-        // Daftar ruangan + jumlah barang
         $locations = Location::withCount('barangs')
             ->orderBy('name')
             ->get(['id','name']);
 
-        // Query barang di ruangan terpilih
         $base = Barang::query()
             ->with(['category','location'])
             ->withCount([
@@ -43,7 +38,6 @@ class RuanganController extends Controller
             ->when(in_array($kondisi, ['Baik','Rusak Ringan','Rusak Berat','Hilang'], true),
                 fn($q) => $q->where('kondisi', $kondisi));
 
-        // Urutan / sort
         switch ($sort) {
             case 'tgl_perolehan_asc':
                 $base->orderBy('tgl_perolehan', 'asc');
@@ -70,13 +64,11 @@ class RuanganController extends Controller
                 $base->orderBy('created_at', 'desc');
                 break;
             default:
-                $base->latest('tgl_perolehan'); // default sama seperti sebelumnya
+                $base->latest('tgl_perolehan');
         }
 
-        // Paginasi
         $barangs = $base->paginate(15)->appends($request->query());
 
-        // Statistik kondisi untuk ruangan terpilih
         $stats = [
             'total'  => (clone $base)->count(),
             'baik'   => (clone $base)->where('kondisi','Baik')->count(),
@@ -85,18 +77,18 @@ class RuanganController extends Controller
             'hilang' => (clone $base)->where('kondisi','Hilang')->count(),
         ];
 
-        // Ruangan aktif (opsional)
         $activeLocation = $lokasiId ? $locations->firstWhere('id', $lokasiId) : null;
 
         return view('ruangan.index', compact(
             'locations','barangs','stats','activeLocation',
-            'lokasiId','search','kondisi'
+            'lokasiParam','lokasiId','search','kondisi'
         ));
     }
 
     public function print(Request $request)
     {
-        $lokasiId = (int) $request->query('lokasi');
+        $lokasiParam = $request->query('lokasi');
+        $lokasiId    = is_numeric($lokasiParam) ? (int) $lokasiParam : null;
         $search   = trim((string) $request->query('q', ''));
         $kondisi  = $request->query('kondisi');
         $sort     = $request->query('sort');
@@ -116,7 +108,6 @@ class RuanganController extends Controller
             ->when(in_array($kondisi, ['Baik','Rusak Ringan','Rusak Berat','Hilang'], true),
                 fn($q) => $q->where('kondisi', $kondisi));
 
-        // Urutan untuk tampilan print juga ikut filter sort
         switch ($sort) {
             case 'tgl_perolehan_asc':
                 $base->orderBy('tgl_perolehan', 'asc');
@@ -146,7 +137,6 @@ class RuanganController extends Controller
                 $base->orderBy('nama_barang');
         }
 
-        // Tanpa pagination untuk cetak
         $items = $base->get();
 
         $location = $lokasiId ? Location::find($lokasiId) : null;
@@ -154,13 +144,11 @@ class RuanganController extends Controller
         return view('ruangan.print', compact('items','location','search','kondisi'));
     }
 
-    /** EXPORT EXCEL SESUAI FILTER */
 
-
-    /** EXPORT PDF SESUAI FILTER (GUNAKAN VIEW ruangan.print) */
     public function exportPdf(Request $request)
     {
-        $lokasiId = (int) $request->query('lokasi');
+        $lokasiParam = $request->query('lokasi');
+        $lokasiId    = is_numeric($lokasiParam) ? (int) $lokasiParam : null;
         $search   = trim((string) $request->query('q', ''));
         $kondisi  = $request->query('kondisi');
         $sort     = $request->query('sort');
@@ -226,7 +214,8 @@ class RuanganController extends Controller
 
     public function exportExcel(Request $request)
 {
-    $lokasiId = (int) $request->query('lokasi');
+    $lokasiParam = $request->query('lokasi');
+    $lokasiId    = is_numeric($lokasiParam) ? (int) $lokasiParam : null;
     $search   = trim((string) $request->query('q', ''));
     $kondisi  = $request->query('kondisi');
     $sort     = $request->query('sort');
@@ -269,7 +258,6 @@ class RuanganController extends Controller
 
     $items = $base->get();
 
-    // PAKAI .csv, BUKAN .xls
     $filename = 'barang_ruangan_' . now()->format('Ymd_His') . '.csv';
 
     $headers = [
@@ -280,7 +268,6 @@ class RuanganController extends Controller
     $callback = function () use ($items) {
         $handle = fopen('php://output', 'w');
 
-        // header kolom
         fputcsv($handle, [
             'Kode Register',
             'Nama Barang',
@@ -291,7 +278,7 @@ class RuanganController extends Controller
             'Tanggal Perolehan',
             'Nilai Perolehan',
             'Ruangan',
-        ], ';'); // ; supaya enak di regional Indonesia
+        ], ';');
 
         foreach ($items as $b) {
             fputcsv($handle, [

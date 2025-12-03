@@ -1,4 +1,3 @@
-{{-- resources/views/maintenance/pdf.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -99,7 +98,6 @@
 </head>
 <body>
 
-    {{-- Bagian kiri (Sifat, Lampiran, Hal) + kanan (kota, tanggal) --}}
     <div class="clearfix">
         <table class="meta-table" style="float:left;">
             <tr>
@@ -119,7 +117,6 @@
         </div>
     </div>
 
-    {{-- Alamat tujuan --}}
     <div class="mt-30">
         Kepada Yth.<br>
         Kepala {{ $instansiTujuan ?? 'TVRI Stasiun Sulawesi Tengah' }}<br>
@@ -127,22 +124,19 @@
         <strong>{{ $kotaTujuan ?? 'Palu' }}</strong>
     </div>
 
-    {{-- Paragraf pembuka --}}
     <div class="mt-20">
         Dengan hormat,
     </div>
 
     @php
-        // Ambil uraian dari setiap baris sebagai keterangan barang + lokasi
         $deskripsiBarang = collect($rows ?? [])
             ->map(function ($row) {
-                // dukung array dan objek
                 return is_array($row)
                     ? ($row['uraian'] ?? null)
                     : ($row->uraian ?? null);
             })
-            ->filter()      // buang null/kosong
-            ->unique()      // hilangkan duplikat
+            ->filter() 
+            ->unique()     
             ->values();
     @endphp
 
@@ -157,11 +151,7 @@
         yang sudah tidak berfungsi dengan baik, dengan rincian sebagai berikut.
     </p>
 
-    {{-- Tabel rincian permintaan --}}
     @php
-        // diasumsikan $rows adalah collection/array dari data maintenance yang akan dicetak
-        // dan sudah disiapkan di controller.
-        // Contoh field yang digunakan: uraian, jumlah, satuan, pagu, total.
         $totalKeseluruhan = collect($rows ?? [])->sum('total');
     @endphp
 
@@ -198,7 +188,6 @@
                 <td colspan="6" style="text-align:center;">Tidak ada data.</td>
             </tr>
         @endforelse
-        {{-- Baris jumlah --}}
         <tr>
             <td colspan="4" class="right"><strong>Jumlah</strong></td>
             <td class="right">

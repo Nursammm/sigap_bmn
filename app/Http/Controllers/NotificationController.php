@@ -25,7 +25,7 @@ class NotificationController extends Controller
             MaintenanceNoteNotification::class,
         ];
 
-        $filter = $request->query('filter', 'all'); // all | unread
+        $filter = $request->query('filter', 'all');
 
         $query = $user->notifications()
             ->whereIn('type', $types)
@@ -57,7 +57,6 @@ class NotificationController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
-        // tandai satu notifikasi sebagai dibaca
         if (is_null($notification->read_at)) {
             $notification->markAsRead();
         }
@@ -73,13 +72,11 @@ class NotificationController extends Controller
         $query = $user->unreadNotifications();
 
         if ($isAdmin) {
-            // ADMIN: JANGAN MENANDAI NOTIFIKASI MUTASI
             $query->whereNotIn('type', [
                 MutasiRequestedNotification::class,
                 MutasiRequestResolvedNotification::class,
             ]);
         }
-        // PENGELOLA: biarkan semua tipe (mutasi + maintenance) ikut ditandai
 
         $query->update(['read_at' => now()]);
 
@@ -95,7 +92,6 @@ class NotificationController extends Controller
         return back()->with('ok', 'Tidak ada notifikasi yang dipilih.');
     }
 
-    // Hapus notifikasi milik user ini saja
     $user->notifications()
         ->whereIn('id', $ids)
         ->delete();

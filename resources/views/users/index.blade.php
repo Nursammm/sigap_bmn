@@ -1,4 +1,3 @@
-{{-- resources/views/users/index.blade.php --}}
 <x-layout>
     <x-slot name="title">Manajemen Pengguna</x-slot>
 
@@ -17,8 +16,6 @@
         @endif
 
         <div class="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden">
-
-            {{-- HEADER --}}
             <div class="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
                 <h2 class="text-lg font-semibold text-gray-800">
 
@@ -31,7 +28,6 @@
                 </a>
             </div>
 
-            {{-- TABEL --}}
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead>
@@ -67,14 +63,12 @@
                                             Edit
                                         </a>
 
-                                        {{-- BUTTON HAPUS --}}
                                         <button onclick="showDeleteModal({{ $user->id }})"
                                             class="px-3 py-1 text-xs font-semibold rounded-md
                                                    bg-red-500 hover:bg-red-600 text-white">
                                             Hapus
                                         </button>
 
-                                        {{-- FORM HAPUS --}}
                                         <form id="delete-form-{{ $user->id }}"
                                               action="{{ route('users.destroy', $user->id) }}"
                                               method="POST" class="hidden">
@@ -94,8 +88,6 @@
                     </tbody>
                 </table>
             </div>
-
-            {{-- PAGINATION --}}
             @if($users instanceof \Illuminate\Contracts\Pagination\Paginator)
                 <div class="px-6 py-3 border-t bg-gray-50">
                     {{ $users->links() }}
@@ -104,7 +96,6 @@
         </div>
     </div>
 
-    {{-- MODAL KONFIRMASI HAPUS --}}
     <div id="delete-modal"
          class="fixed inset-0 bg-black/50 hidden justify-center items-center z-50">
         <div class="bg-white w-full max-w-sm rounded-xl p-6 shadow-xl">

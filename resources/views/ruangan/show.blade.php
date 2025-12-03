@@ -1,4 +1,3 @@
-{{-- resources/views/ruangan/show.blade.php --}}
 <x-layout>
     <x-slot name="title">Ruangan: {{ $location->name }}</x-slot>
 
@@ -34,12 +33,10 @@
                         </td>
                         <td class="px-3 py-2">
                             <div class="flex items-center justify-center gap-2">
-                                {{-- Riwayat Maintenance (filter by barang) --}}
                                 <a href="{{ route('maintenance.index', ['barang_id' => $b->id]) }}"
                                    class="inline-flex items-center px-3 py-1.5 bg-white border rounded-lg text-xs hover:bg-gray-50 shadow">
                                     🛠 Riwayat
                                 </a>
-                                {{-- Ajukan Maintenance untuk barang ini --}}
                                 <a href="{{ route('maintenance.create', $b) }}"
                                    class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 shadow">
                                     + Ajukan

@@ -2,16 +2,14 @@
   <x-slot:title>{{ $title ?? 'Dashboard' }}</x-slot:title>
 
   <div class="px-8 py-6 space-y-8">
-    
-    <!-- Header -->
+
     <div>
       <h1 class="text-4xl font-bold text-gray-800 mb-1">
         Selamat Datang, {{ Auth::user()->name }}
       </h1>
-      <p class="text-gray-600">Kelola dan pantau aset BMN dengan sistem terpadu</p>
+      <p class="text-gray-600">Kelola dan pantau aset dengan sistem terpadu</p>
     </div>
 
-    <!-- Statistik Utama -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Total Aset -->
       <div class="bg-white rounded-xl shadow-md p-6 flex flex-col items-start hover:shadow-lg transition">
@@ -117,6 +115,7 @@
         <div class="space-y-3">
 
           <!-- Tambah Aset Baru -->
+          @admin
           <a href="{{ route('barang.create') }}" 
              class="flex items-center p-3 rounded-lg hover:bg-blue-50 transition">
             <span class="bg-blue-100 text-blue-600 rounded-lg p-2 mr-3">
@@ -131,6 +130,7 @@
               <div class="text-gray-500 text-sm">Input data pengadaan</div>
             </div>
           </a>
+          @endadmin
 
           <!-- Review Pemeliharaan -->
           <a href="{{ route('maintenance.index') }}" 
