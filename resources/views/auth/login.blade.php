@@ -36,29 +36,47 @@
                            text-white placeholder-gray-200 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                     required>
 
-                <!-- Password -->
-                <input type="password" name="password" placeholder="Password"
-                    class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl
-                           text-white placeholder-gray-200 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-                    required>
-
-                <!-- Remember + Forgot -->
-                <div class="flex items-center justify-between text-sm text-gray-200">
-                    <label class="flex items-center">
-                        <input type="checkbox" name="remember" class="mr-2 rounded border-gray-400 bg-white/20">
-                        Remember me
-                    </label>
-                    <a href="{{ route('password.request') }}" class="text-indigo-300 hover:underline">
-                        Forgot password?
-                    </a>
+                <!-- Password with toggle -->
+                <div class="relative">
+                    <input type="password" name="password" placeholder="Password"
+                        class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl
+                               text-white placeholder-gray-200 focus:ring-2 focus:ring-indigo-400 focus:outline-none pr-11"
+                        required id="passwordInput">
+                    <button type="button"
+                            class="absolute inset-y-0 right-0 px-3 text-gray-200 hover:text-white"
+                            aria-label="Toggle password visibility"
+                            onclick="togglePassword()">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                  d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"/>
+                            <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
+                        </svg>
+                    </button>
                 </div>
 
-                <!-- Tombol Login -->
-                <button type="submit"
-                    class="w-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">
-                    Sign In
-                </button>
-            </form>
-        </div>
+                <div>
+                    
+                </div>
+
+
+            <!-- Tombol Login -->
+            <button type="submit"
+                class="w-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">
+                Sign In
+            </button>
+        </form>
     </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('passwordInput');
+        const icon  = document.getElementById('eyeIcon');
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        icon.innerHTML = isHidden
+            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.5 0-9-7-9-7a18.705 18.705 0 014.5-5.5M9.88 9.88a3 3 0 104.24 4.24M10.6 5.1A9.965 9.965 0 0112 5c5.5 0 9 7 9 7a18.72 18.72 0 01-2.81 3.59"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20 20 4"/>'
+            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"/><circle cx="12" cy="12" r="3" stroke-width="1.8"/>';
+    }
+</script>
 </x-guest-layout>

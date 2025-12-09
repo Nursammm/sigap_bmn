@@ -1,3 +1,4 @@
+{{-- resources/views/ruangan/index.blade.php --}}
 <x-layout>
     <x-slot name="title">Daftar Barang Ruangan</x-slot>
 
@@ -8,17 +9,33 @@
     <div class="max-w-7xl mx-auto">
         <div class="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-100">
 
+            {{-- Header: Filter + Export --}}
             <div class="px-6 md:px-8 py-5 border-b bg-gray-50"
                  x-data="{ openExport:false }">
                 <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                    {{-- Form Filter --}}
                     <form id="filterForm" method="GET" action="{{ route('ruangan.index') }}"
                           class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end w-full">
+
+                        {{-- Filter Ruangan --}}
                         <div class="flex flex-col min-w-[180px] max-w-[240px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Ruangan</label>
                             <select name="lokasi"
                                     class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"
                                     onchange="document.getElementById('filterForm').submit()">
-                                <option value="" @selected(($lokasiParam ?? '') === '' || ($lokasiParam ?? '') === null)>- Semua Ruangan -</option>
+                                {{-- Semua ruangan --}}
+                                <option value=""
+                                    @selected(($lokasiParam ?? '') === '' || ($lokasiParam ?? '') === null)>
+                                    - Semua Ruangan -
+                                </option>
+
+                                {{-- Barang tanpa ruangan (location_id NULL / 0) --}}
+                                <option value="-"
+                                    @selected(($lokasiParam ?? '') === '-')>
+                                    - Tanpa Ruangan -
+                                </option>
+
+                                {{-- Ruangan dari tabel locations --}}
                                 @foreach ($locations as $loc)
                                     <option value="{{ $loc->id }}" @selected($lokasiId == $loc->id)>
                                         {{ $loc->name }} ({{ $loc->barangs_count }})
@@ -27,6 +44,7 @@
                             </select>
                         </div>
 
+                        {{-- Pencarian --}}
                         <div class="flex flex-col min-w-[180px] max-w-[250px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
                             <input type="text" name="q" value="{{ $search }}"
@@ -35,6 +53,7 @@
                                    oninput="debouncedSubmitFilter()">
                         </div>
 
+                        {{-- Filter Kondisi --}}
                         <div class="flex flex-col min-w-[150px] max-w-[180px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kondisi</label>
                             <select name="kondisi"
@@ -49,6 +68,7 @@
                             </select>
                         </div>
 
+                        {{-- Sort --}}
                         <div class="flex flex-col min-w-[180px] max-w-[220px]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Urutkan</label>
                             <select name="sort"
@@ -56,34 +76,35 @@
                                     onchange="document.getElementById('filterForm').submit()">
                                 @php $sort = request('sort'); @endphp
                                 <option value="">Default</option>
-                                <option value="tgl_perolehan_desc" @selected($sort === 'tgl_perolehan_desc')>
+                                <option value="tgl_perolehan_desc" @selected($sort === 'tgl_perolehan_desc')}>
                                     Tanggal Perolehan → Terbaru
                                 </option>
-                                <option value="tgl_perolehan_asc" @selected($sort === 'tgl_perolehan_asc')>
+                                <option value="tgl_perolehan_asc" @selected($sort === 'tgl_perolehan_asc')}>
                                     Tanggal Perolehan → Terlama
                                 </option>
-                                <option value="nama_asc" @selected($sort === 'nama_asc')>
+                                <option value="nama_asc" @selected($sort === 'nama_asc')}>
                                     Nama Barang → A - Z
                                 </option>
-                                <option value="nama_desc" @selected($sort === 'nama_desc')>
+                                <option value="nama_desc" @selected($sort === 'nama_desc')}>
                                     Nama Barang → Z - A
                                 </option>
-                                <option value="kode_asc" @selected($sort === 'kode_asc')>
+                                <option value="kode_asc" @selected($sort === 'kode_asc')}>
                                     Kode Barang → Kecil - Besar
                                 </option>
-                                <option value="kode_desc" @selected($sort === 'kode_desc')>
+                                <option value="kode_desc" @selected($sort === 'kode_desc')}>
                                     Kode Barang → Besar - Kecil
                                 </option>
-                                <option value="input_desc" @selected($sort === 'input_desc')>
+                                <option value="input_desc" @selected($sort === 'input_desc')}>
                                     Tanggal Input → Terbaru
                                 </option>
-                                <option value="input_asc" @selected($sort === 'input_asc')>
+                                <option value="input_asc" @selected($sort === 'input_asc')}>
                                     Tanggal Input → Terlama
                                 </option>
                             </select>
                         </div>
                     </form>
 
+                    {{-- Tombol Export --}}
                     <div class="flex justify-end md:ml-4">
                         <div class="relative">
                             <button type="button"
@@ -121,8 +142,11 @@
                     </div>
                 </div>
 
+                {{-- Info filter aktif --}}
                 <div class="mt-4 text-sm text-gray-600">
-                    @if ($activeLocation)
+                    @if (($lokasiParam ?? '') === '-')
+                        Menampilkan barang yang belum memiliki ruangan
+                    @elseif ($activeLocation)
                         Menampilkan barang di ruangan:
                         <span class="font-medium text-gray-800">{{ $activeLocation->name }}</span>
                     @else
@@ -131,6 +155,7 @@
                 </div>
             </div>
 
+            {{-- Kartu Statistik --}}
             <div class="px-6 md:px-8 py-5 border-b">
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                     <div class="rounded-lg border bg-white p-3 text-center">
@@ -156,6 +181,7 @@
                 </div>
             </div>
 
+            {{-- Tabel Barang --}}
             <div class="px-6 md:px-8 py-6">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -208,21 +234,23 @@
                                     </td>
                                     <td class="px-3 py-2">{{ optional($b->location)->name ?? '' }}</td>
 
+                                    {{-- QR button --}}
                                     <td class="px-3 py-2 text-center">
-                                    <button type="button"
-                                        onclick="openQrModal(
-                                            '{{ $b->id }}',
-                                            '{{ $b->nama_barang }}',
-                                            '{{ $b->kode_register }}',
-                                            '{{ $b->alternatif_qr }}',
-                                            '{{ optional($b->location)->name ?? '' }}'
-                                        )"
-                                        class="p-1.5 rounded-md border border-gray-300 hover:bg-gray-100 shadow-sm"
-                                        title="Lihat QR">
-                                        <i class="fas fa-qrcode text-gray-600"></i>
-                                    </button>
-                                </td>
+                                        <button type="button"
+                                            onclick="openQrModal(
+                                                '{{ $b->id }}',
+                                                '{{ $b->nama_barang }}',
+                                                '{{ $b->kode_register }}',
+                                                '{{ $b->alternatif_qr }}',
+                                                '{{ optional($b->location)->name ?? '' }}'
+                                            )"
+                                            class="p-1.5 rounded-md border border-gray-300 hover:bg-gray-100 shadow-sm"
+                                            title="Lihat QR">
+                                            <i class="fas fa-qrcode text-gray-600"></i>
+                                        </button>
+                                    </td>
 
+                                    {{-- Maintenance --}}
                                     <td class="px-3 py-2">
                                         <div class="flex items-center justify-center gap-2">
                                             <a href="{{ route('maintenance.index', ['barang_id' => $b->id]) }}"
@@ -259,13 +287,15 @@
                     </table>
                 </div>
 
+                {{-- Pagination --}}
                 <div class="mt-4">
                     {{ $barangs->links() }}
                 </div>
             </div>
         </div>
     </div>
-    
+
+    {{-- Modal QR --}}
     <div id="qr-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-all scale-95 opacity-0" id="qr-box">
             <div class="px-6 pt-6 text-center">
@@ -277,52 +307,58 @@
                 <p id="qr-location" class="text-sm text-gray-500"></p>
             </div>
             <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
-                <button onclick="closeQrModal()" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300">Tutup</button>
-                <button onclick="window.print()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Print</button>
+                <button onclick="closeQrModal()" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300">
+                    Tutup
+                </button>
+                <button onclick="window.print()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+                    Print
+                </button>
             </div>
         </div>
     </div>
 
-<script>
-    function openQrModal(id, nama, kode_register, alternatif_qr, lokasi) {
-        const qrData = alternatif_qr;
-        const encodedData = encodeURIComponent(qrData);
+    {{-- Script QR modal --}}
+    <script>
+        function openQrModal(id, nama, kode_register, alternatif_qr, lokasi) {
+            const qrData = alternatif_qr;
+            const encodedData = encodeURIComponent(qrData);
 
-        document.getElementById('qr-title').innerText = "QR Code - " + nama;
-        document.getElementById('qr-image').src =
-            "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodedData;
+            document.getElementById('qr-title').innerText = "QR Code - " + nama;
+            document.getElementById('qr-image').src =
+                "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodedData;
 
-        document.getElementById('qr-kode_register').innerText =
-            "Kode Register: " + kode_register;
+            document.getElementById('qr-kode_register').innerText =
+                "Kode Register: " + kode_register;
 
-        document.getElementById('qr-location').innerText =
-            "Lokasi: " + lokasi;
+            document.getElementById('qr-location').innerText =
+                "Lokasi: " + (lokasi || '-');
 
-        let modal = document.getElementById('qr-modal');
-        let box = document.getElementById('qr-box');
+            let modal = document.getElementById('qr-modal');
+            let box = document.getElementById('qr-box');
 
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
 
-        setTimeout(() => {
-            box.classList.remove('scale-95', 'opacity-0');
-            box.classList.add('scale-100', 'opacity-100');
-        }, 50);
-    }
+            setTimeout(() => {
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
 
-    function closeQrModal() {
-        let modal = document.getElementById('qr-modal');
-        let box = document.getElementById('qr-box');
+        function closeQrModal() {
+            let modal = document.getElementById('qr-modal');
+            let box = document.getElementById('qr-box');
 
-        box.classList.add('scale-95', 'opacity-0');
+            box.classList.add('scale-95', 'opacity-0');
 
-        setTimeout(() => {
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
-        }, 200);
-    }
-</script>
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+    </script>
 
+    {{-- Script debounce filter --}}
     <script>
         let filterTimer;
         function debouncedSubmitFilter() {
@@ -333,4 +369,3 @@
         }
     </script>
 </x-layout>
-

@@ -144,7 +144,7 @@
         Bersama ini kami mengajukan permohonan Pemeliharaan Peralatan dan Mesin
         berupa
         @if($deskripsiBarang->isNotEmpty())
-            {{ $deskripsiBarang->implode('; ') }}
+            {{ $deskripsiBarang->implode(', ') }}
         @else
             barang sebagaimana tercantum pada rincian di bawah
         @endif

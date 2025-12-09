@@ -62,8 +62,15 @@ class MaintenanceController extends Controller
             ->sortBy('nama_barang')
             ->values();
 
+        $maintenanceByBarang = Maintenance::with('barang')
+            ->where('status', 'Selesai')
+            ->orderBy('barang_id')
+            ->latest('tanggal_mulai')
+            ->get()
+            ->groupBy('barang_id');
+
         return view('maintenance.index', compact(
-            'items','totalBiaya','status','q','from','to','barangId','barangList'
+            'items','totalBiaya','status','q','from','to','barangId','barangList','maintenanceByBarang'
         ));
     }
 
@@ -108,7 +115,7 @@ class MaintenanceController extends Controller
         'biaya'           => ['nullable','numeric','min:0'],
         'status'          => ['nullable', \Illuminate\Validation\Rule::in(['Diajukan','Disetujui','Proses','Selesai','Ditolak'])],
         'photos'          => ['nullable','array','max:10'],
-        'photos.*'        => ['image','mimes:jpg,jpeg,png,webp','max:4096'],
+        'photos.*'        => ['image','mimes:jpg,jpeg,png,webp','max:2048'],
     ]);
 
     $status = $isAdmin ? ($data['status'] ?? 'Disetujui') : 'Diajukan';
@@ -162,7 +169,7 @@ class MaintenanceController extends Controller
             'biaya'           => ['nullable','numeric','min:0'],
             'status'          => ['nullable', Rule::in(['Diajukan','Disetujui','Proses','Selesai','Ditolak'])],
             'photos'          => ['nullable','array','max:10'],
-            'photos.*'        => ['image','mimes:jpg,jpeg,png,webp','max:4096'],
+            'photos.*'        => ['image','mimes:jpg,jpeg,png,webp','max:2048'],
             'remove_photos'   => ['nullable','array'],
             'remove_photos.*' => ['string'],
             'admin_note'      => ['nullable', 'string', 'max:5000']
@@ -339,20 +346,36 @@ class MaintenanceController extends Controller
 
     public function exportPdf(Request $request)
 {
-    $barang = Barang::findOrFail($request->barang_id);
+    $maintenanceIds = collect((array) $request->input('maintenance_id'))
+        ->filter(fn($id) => is_numeric($id))
+        ->map(fn($id) => (int) $id)
+        ->unique()
+        ->values();
 
-    $rows = Maintenance::where('barang_id', $barang->id)
+    if ($maintenanceIds->isEmpty()) {
+        return back()->withErrors('Pilih minimal satu riwayat pemeliharaan untuk dicetak.');
+    }
+
+    $maintenances = Maintenance::with('barang')
+        ->whereIn('id', $maintenanceIds)
+        ->where('status', 'Selesai')
+        ->orderBy('barang_id')
         ->orderBy('tanggal_mulai')
-        ->get()
-        ->map(function ($m) {
-            return [
-                'uraian' => $m->barang->nama_barang,
-                'jumlah' => 1,
-                'satuan' => 'Unit',
-                'pagu'   => $m->biaya,
-                'total'  => $m->biaya,
-            ];
-        });
+        ->get();
+
+    if ($maintenances->isEmpty()) {
+        return back()->withErrors('Data pemeliharaan tidak ditemukan atau belum berstatus selesai.');
+    }
+
+    $rows = $maintenances->map(function ($m) {
+        return [
+            'uraian' => $m->barang?->nama_barang ?? '-',
+            'jumlah' => 1,
+            'satuan' => 'Unit',
+            'pagu'   => $m->biaya,
+            'total'  => $m->biaya,
+        ];
+    });
 
     $pdf = Pdf::loadView('maintenance.pdf', [
         'rows'   => $rows,

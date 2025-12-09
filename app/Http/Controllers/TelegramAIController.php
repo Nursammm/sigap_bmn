@@ -8,6 +8,9 @@ use App\Models\Barang;
 
 class TelegramAIController extends Controller
 {
+    // ======================================================
+    // 🔹 HANDLE UPDATE DARI TELEGRAM
+    // ======================================================
     public function handle(Request $request)
     {
         $telegram = new Api(env('TELEGRAM_BOT_TOKEN'));
@@ -21,61 +24,52 @@ class TelegramAIController extends Controller
         $textLower = strtolower($text);
 
         // ======================================================
-        // 🔍 1. CARI BERDASARKAN KODE BARANG (cek xxx)
+        // 1. CARI BERDASARKAN KODE BARANG
         // ======================================================
         if (preg_match('/^cek\s+([a-zA-Z0-9]+)/', $textLower, $m)) {
-
             $kode = $m[1];
             $barang = Barang::where('kode_barang', 'LIKE', "%$kode%")->first();
-
             if ($barang) {
                 return $this->reply($telegram, $chat_id, $this->formatBarang($barang));
             }
-
             return $this->reply($telegram, $chat_id, "❌ Barang dengan kode *$kode* tidak ditemukan.");
         }
 
         // ======================================================
-        // 🔍 2. CARI BERDASARKAN NAMA BARANG (cari laptop)
+        // 2. CARI BERDASARKAN NAMA BARANG
         // ======================================================
         if (preg_match('/^(cari|lihat|info|dimana)\s+(.+)/', $textLower, $m)) {
-
             $nama = $m[2];
             $barang = Barang::where('nama_barang', 'LIKE', "%$nama%")->first();
-
             if ($barang) {
                 return $this->reply($telegram, $chat_id, $this->formatBarang($barang));
             }
         }
 
         // ======================================================
-        // 🔍 3. CARI BERDASARKAN QR (qr xxx)
+        // 3. CARI BERDASARKAN QR
         // ======================================================
         if (preg_match('/^qr\s*([a-zA-Z0-9]+)/', $textLower, $m)) {
-
             $qr = $m[1];
             $barang = Barang::where('qr_string', 'LIKE', "%$qr%")->first();
-
             if ($barang) {
                 return $this->reply($telegram, $chat_id, $this->formatBarang($barang));
             }
         }
 
         // ======================================================
-        // 🔍 4. CARI SN (sn xxx)
+        // 4. CARI BERDASARKAN SN
         // ======================================================
         if (preg_match('/^sn\s*([a-zA-Z0-9]+)/', $textLower, $m)) {
-
             $sn = $m[1];
             $barang = Barang::where('sn', 'LIKE', "%$sn%")->first();
-
             if ($barang) {
                 return $this->reply($telegram, $chat_id, $this->formatBarang($barang));
             }
         }
 
         // ======================================================
-        // 🟦 DEFAULT HELP
+        // DEFAULT HELP
         // ======================================================
         $default = "Halo! Saya *BroSigap Bot* 🤖📦\n"
             . "Saya membantu mencari data aset TVRI.\n\n"
@@ -94,6 +88,18 @@ class TelegramAIController extends Controller
     }
 
     // ======================================================
+    // 🔹 SET WEBHOOK TELEGRAM
+    // ======================================================
+    public function setWebhook()
+{
+    $telegram = new \Telegram\Bot\Api(env('TELEGRAM_BOT_TOKEN'));
+    $webhookUrl = 'https://tvri-sulteng.com/api/telegram/webhook';
+    $response = $telegram->setWebhook(['url' => $webhookUrl]);
+    return response()->json($response);
+}
+
+
+    // ======================================================
     // 📨 Mengirim pesan ke user
     // ======================================================
     private function reply($telegram, $chat_id, $text)
@@ -109,10 +115,10 @@ class TelegramAIController extends Controller
     // 📦 FORMAT INFORMASI BARANG
     // ======================================================
     private function formatBarang($b)
-{
-    $lokasi = $b->location ? $b->location->nama_lokasi : '-';
+    {
+        $lokasi = $b->location ? $b->location->nama_lokasi : '-';
 
-    return 
+        return 
 "📦 *DATA BARANG*
 —————————————
 *Nama:* $b->nama_barang
@@ -130,5 +136,5 @@ class TelegramAIController extends Controller
 —————————————
 Diperbarui: $b->updated_at
 ";
-}
+    }
 }

@@ -1,5 +1,5 @@
 <aside 
-    class="hidden md:fixed md:inset-y-0 md:flex md:flex-col transition-all duration-300"
+    class="hidden md:fixed md:inset-y-0 md:flex md:flex-col transition-all duration-300 shadow-xl"
     style="background-color:#08376B;"
     :class="sidebarOpen ? 'md:w-64' : 'md:w-0 overflow-hidden'">
 
@@ -10,7 +10,7 @@
                 <img class="w-40 h-40 object-contain" src="{{ asset('storage/gap2.png') }}" alt="Logo">
             </div>
 
-            <div class="px-4 mt-2 space-y-2">
+            <div class="px-4 mt-2 pb-6 space-y-1 overflow-y-auto">
                 <x-navbar />
             </div>
         </div>
@@ -29,7 +29,7 @@
                         :aria-expanded="open" 
                         class="flex items-center gap-3 w-full rounded-md px-3 py-2 hover:bg-white/10 transition focus:outline-none">
                         <img class="w-10 h-10 rounded-full outline -outline-offset-1 outline-white/10" 
-                             src="{{ Auth::user()->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=08376B&color=fff' }}" 
+                             src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=08376B&color=fff' }}" 
                              alt="Avatar">
                         <div class="text-left">
                             <div class="text-sm font-medium leading-tight">{{ Auth::user()->name }}</div>

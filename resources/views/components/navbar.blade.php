@@ -11,9 +11,9 @@
 </x-nav-link>
 
 <x-nav-link href="{{ route('mutasi.index') }}" :active="request()->routeIs('mutasi.*')" icon="mutasi">
-    History
+    Riwayat Mutasi
 </x-nav-link>
 
 <x-nav-link href="{{ route('maintenance.index') }}" :active="request()->routeIs('maintenance.*')" icon="maintenance">
-    Maintenance
+    Pemeliharaan
 </x-nav-link>

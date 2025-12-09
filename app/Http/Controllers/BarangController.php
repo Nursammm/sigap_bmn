@@ -23,6 +23,10 @@ class BarangController extends Controller
             $query->where(function ($qq) use ($q) {
                 $qq->where('nama_barang', 'like', "%{$q}%")
                    ->orWhere('nup', 'like', "%{$q}%")
+                   ->orWhere('kode_barang', 'like', "%{$q}%")
+                   ->orWhere('kode_register', 'like', "%{$q}%")
+                   ->orWhere('sn', 'like', "%{$q}%")
+                   ->orWhere('merek', 'like', "%{$q}%")
                    ->orWhereHas('location', function ($qLoc) use ($q) {
                        $qLoc->where('name', 'like', "%{$q}%");
                    });
@@ -139,6 +143,13 @@ class BarangController extends Controller
             ])->withInput();
         }
 
+        $kodeSakter = $validated['kode_sakter']
+            ?? Barang::where('nama_barang', $validated['nama_barang'])
+                ->whereNotNull('kode_sakter')
+                ->orderByDesc('id')
+                ->value('kode_sakter')
+            ?? $kodeBarang;
+
         $latestNup = Barang::where('kode_barang', $kodeBarang)->max('nup') ?? 0;
         $nup       = $latestNup + 1;
 
@@ -162,10 +173,10 @@ class BarangController extends Controller
             'nup'             => $nup,
             'special_code'    => $specialCode,
             'kode_register'   => $validated['kode_register'] ?? null,
-            'kode_sakter'     => $validated['kode_sakter'],
+            'kode_sakter'     => $kodeSakter,
             'sn'              => $validated['sn'],
             'qr_string'       => $validated['kode_register'] ?? null,
-            'alternatif_qr'   => ($validated['kode_sakter'] ?? '') . '*' . $kodeBarang . '*' . $nup,
+            'alternatif_qr'   => ($kodeSakter ?? '') . '*' . $kodeBarang . '*' . $nup,
             'foto_url'        => $gambarPath,
             'keterangan'      => $validated['keterangan'],
             'tgl_perolehan'   => $validated['tgl_perolehan'] ?? null,
@@ -199,6 +210,8 @@ class BarangController extends Controller
             'foto_url.*'      => 'image|mimes:jpg,jpeg,png|max:2048',
 
             'existing_photos' => 'nullable|array',
+            'remove_photos'   => 'nullable|array',
+            'remove_photos.*' => 'string',
         ]);
 
         $barang->fill([
@@ -217,6 +230,19 @@ class BarangController extends Controller
             $barang->kode_barang . '*' . str_pad($barang->nup, 1, '0', STR_PAD_LEFT);
 
         $currentPhotos = $barang->foto_url ?? [];
+        if (!is_array($currentPhotos)) {
+            $currentPhotos = $currentPhotos ? [$currentPhotos] : [];
+        }
+
+        $remove = $request->input('remove_photos', []);
+        if (!empty($remove)) {
+            foreach ($remove as $path) {
+                if (in_array($path, $currentPhotos, true)) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+            $currentPhotos = array_values(array_diff($currentPhotos, $remove));
+        }
 
         if ($request->hasFile('foto_url')) {
             foreach ($request->file('foto_url') as $file) {

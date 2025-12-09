@@ -24,6 +24,8 @@ class MaintenanceNoteNotification extends Notification
         $barang = $this->maintenance->barang;
 
         return [
+            'maintenance_id'=> $this->maintenance->id,
+            'barang_id'     => $this->maintenance->barang_id,
             'barang_nama'   => $barang?->nama_barang,
             'kode_register' => $barang?->kode_register,
             'status'        => $this->maintenance->status,

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
@@ -51,12 +52,17 @@ class ProfileController extends Controller
         }
 
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('profile-photos', 'public');
+            $oldPath = $user->profile_photo_path ?? $user->avatar ?? null;
+            $path    = $request->file('photo')->store('profile-photos', 'public');
 
             if ($this->schemaHasColumn('users', 'profile_photo_path')) {
                 $user->profile_photo_path = $path;
             } elseif ($this->schemaHasColumn('users', 'avatar')) {
                 $user->avatar = $path;
+            }
+
+            if ($oldPath && $oldPath !== $path && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
             }
         }
 

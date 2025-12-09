@@ -260,70 +260,142 @@
 
                 {{-- ============ CATATAN PEMELIHARAAN (MaintenanceNoteNotification) ============ --}}
                 @elseif($t === \App\Notifications\MaintenanceNoteNotification::class)
-                    <div class="rounded-2xl border
-                        {{ $unread ? 'border-amber-200 bg-amber-50/70' : 'border-gray-200 bg-white' }}
-                        p-4 shadow-sm">
-                        <div class="flex justify-between items-start gap-3">
-                            <div class="flex-1">
-                                <div class="text-sm font-semibold text-gray-900">
-                                    Catatan Pemeliharaan
-                                    @if($unread)
-                                        <span class="ml-2 text-[10px] inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase tracking-wide">
-                                            Baru
+                    @php
+                        $status = $d['status'] ?? '';
+                        $target = null;
+                        if (!empty($d['maintenance_id'])) {
+                            $target = ($status === 'Diajukan')
+                                ? route('maintenance.edit', $d['maintenance_id'])
+                                : route('maintenance.index', [
+                                    'maintenance_id' => $d['maintenance_id'],
+                                    'barang_id'      => $d['barang_id'] ?? null,
+                                ]);
+                        }
+                    @endphp
+
+                    @if($unread && $target)
+                        <form action="{{ route('notifications.read', $n->id) }}" method="POST" class="rounded-2xl border
+                            {{ $unread ? 'border-amber-200 bg-amber-50/70' : 'border-gray-200 bg-white' }}
+                            p-0 shadow-sm overflow-hidden">
+                            @csrf
+                            <input type="hidden" name="redirect" value="{{ $target }}">
+                            <button type="submit" class="w-full text-left p-4 hover:bg-amber-50">
+                                <div class="flex justify-between items-start gap-3">
+                                    <div class="flex-1">
+                                        <div class="text-sm font-semibold text-gray-900">
+                                            Pemeliharaan
+                                            <span class="ml-2 text-[10px] inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase tracking-wide">
+                                                Baru
+                                            </span>
+                                        </div>
+                                        <div class="mt-1 text-xs text-gray-700">
+                                            Barang:
+                                            <span class="font-semibold">{{ $d['barang_nama'] ?? '-' }}</span>
+                                            <span class="ml-1 text-[10px] text-gray-500">
+                                                ({{ $d['kode_register'] ?? '-' }})
+                                            </span>
+                                        </div>
+                                        <div class="text-xs text-gray-700">
+                                            Status: <span class="font-medium">{{ $status ?: '-' }}</span>
+                                        </div>
+                                        @if(!empty($d['message']))
+                                            <div class="mt-1 text-xs text-gray-600">
+                                                {{ $d['message'] }}
+                                            </div>
+                                        @endif
+                                        @if(!empty($d['admin_note']))
+                                            <div class="mt-1 text-xs text-gray-500">
+                                                Catatan:
+                                                <span class="italic">"{{ Str::limit($d['admin_note'], 120) }}"</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex flex-col items-end gap-1">
+                                        {{-- checkbox pilih --}}
+                                        <label x-show="deleteMode" x-cloak
+                                               class="inline-flex items-center gap-1 text-[11px] text-gray-500">
+                                            <input type="checkbox"
+                                                   class="rounded border-gray-300 text-rose-600 focus:ring-rose-500"
+                                                   value="{{ $n->id }}"
+                                                   @change="
+                                                    if ($event.target.checked) {
+                                                        if (!selected.includes('{{ $n->id }}')) selected.push('{{ $n->id }}')
+                                                    } else {
+                                                        selected = selected.filter(x => x !== '{{ $n->id }}')
+                                                    }">
+                                            <span>Pilih</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </button>
+                        </form>
+                    @else
+                        <div class="rounded-2xl border
+                            {{ $unread ? 'border-amber-200 bg-amber-50/70' : 'border-gray-200 bg-white' }}
+                            p-4 shadow-sm">
+                            <div class="flex justify-between items-start gap-3">
+                                <div class="flex-1">
+                                    <div class="text-sm font-semibold text-gray-900">
+                                        Pemeliharaan
+                                        @if($unread)
+                                            <span class="ml-2 text-[10px] inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 uppercase tracking-wide">
+                                                Baru
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="mt-1 text-xs text-gray-700">
+                                        Barang:
+                                        <span class="font-semibold">{{ $d['barang_nama'] ?? '-' }}</span>
+                                        <span class="ml-1 text-[10px] text-gray-500">
+                                            ({{ $d['kode_register'] ?? '-' }})
                                         </span>
+                                    </div>
+                                    <div class="text-xs text-gray-700">
+                                        Status: <span class="font-medium">{{ $status ?: '-' }}</span>
+                                    </div>
+                                    @if(!empty($d['message']))
+                                        <div class="mt-1 text-xs text-gray-600">
+                                            {{ $d['message'] }}
+                                        </div>
+                                    @endif
+                                    @if(!empty($d['admin_note']))
+                                        <div class="mt-1 text-xs text-gray-500">
+                                            Catatan:
+                                            <span class="italic">"{{ Str::limit($d['admin_note'], 120) }}"</span>
+                                        </div>
                                     @endif
                                 </div>
-                                <div class="mt-1 text-xs text-gray-700">
-                                    Barang:
-                                    <span class="font-semibold">{{ $d['barang_nama'] ?? '-' }}</span>
-                                    <span class="ml-1 text-[10px] text-gray-500">
-                                        ({{ $d['kode_register'] ?? '-' }})
-                                    </span>
-                                </div>
-                                <div class="text-xs text-gray-700">
-                                    Status: <span class="font-medium">{{ $d['status'] ?? '-' }}</span>
-                                </div>
-                                @if(!empty($d['message']))
-                                    <div class="mt-1 text-xs text-gray-600">
-                                        {{ $d['message'] }}
-                                    </div>
-                                @endif
-                                @if(!empty($d['admin_note']))
-                                    <div class="mt-1 text-xs text-gray-500">
-                                        Catatan:
-                                        <span class="italic">"{{ Str::limit($d['admin_note'], 120) }}"</span>
-                                    </div>
-                                @endif
-                            </div>
 
-                            <div class="flex flex-col items-end gap-1">
-                                {{-- checkbox pilih --}}
-                                <label x-show="deleteMode" x-cloak
-                                       class="inline-flex items-center gap-1 text-[11px] text-gray-500">
-                                    <input type="checkbox"
-                                           class="rounded border-gray-300 text-rose-600 focus:ring-rose-500"
-                                           value="{{ $n->id }}"
-                                           @change="
-                                            if ($event.target.checked) {
-                                                if (!selected.includes('{{ $n->id }}')) selected.push('{{ $n->id }}')
-                                            } else {
-                                                selected = selected.filter(x => x !== '{{ $n->id }}')
-                                            }">
-                                    <span>Pilih</span>
-                                </label>
+                                <div class="flex flex-col items-end gap-1">
+                                    {{-- checkbox pilih --}}
+                                    <label x-show="deleteMode" x-cloak
+                                           class="inline-flex items-center gap-1 text-[11px] text-gray-500">
+                                        <input type="checkbox"
+                                               class="rounded border-gray-300 text-rose-600 focus:ring-rose-500"
+                                               value="{{ $n->id }}"
+                                               @change="
+                                                if ($event.target.checked) {
+                                                    if (!selected.includes('{{ $n->id }}')) selected.push('{{ $n->id }}')
+                                                } else {
+                                                    selected = selected.filter(x => x !== '{{ $n->id }}')
+                                                }">
+                                        <span>Pilih</span>
+                                    </label>
 
-                                @if($unread)
-                                    <form action="{{ route('notifications.read', $n->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit"
-                                                class="text-[11px] text-gray-500 hover:text-gray-700">
-                                            Tandai dibaca
-                                        </button>
-                                    </form>
-                                @endif
+                                    @if($unread)
+                                        <form action="{{ route('notifications.read', $n->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="text-[11px] text-gray-500 hover:text-gray-700">
+                                                Tandai dibaca
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 @endif
             @empty
                 <div class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 py-10 text-center text-sm text-gray-500">

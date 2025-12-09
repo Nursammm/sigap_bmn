@@ -16,7 +16,7 @@
 
 <body 
   class="h-full" 
-  x-data="{ sidebarOpen: true, profileOpen: false }" 
+  x-data="{ sidebarOpen: window.matchMedia('(min-width: 768px)').matches, profileOpen: false }" 
   @keydown.escape.window="sidebarOpen = false; profileOpen = false">
 
 <div class="min-h-full">

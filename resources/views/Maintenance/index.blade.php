@@ -10,7 +10,7 @@
                         <h2 class="text-xl font-semibold">Data Pemeliharaan</h2>
                         @isset($totalBiaya)
                             <p class="text-sm text-gray-500">
-                                Total biaya (hasil filter):
+                                Total biaya :
                                 <span class="font-medium">Rp {{ number_format((int)$totalBiaya,0,',','.') }}</span>
                             </p>
                         @endisset
@@ -99,6 +99,9 @@
                                 $canReject   = $canApprove;
                                 $canComplete = auth()->user()?->role === 'admin' && in_array($m->status, ['Disetujui','Proses'], true);
                                 $rowNumber   = method_exists($items,'firstItem') ? $items->firstItem() + $loop->index : $loop->iteration;
+                                $canRequesterEdit = $m->requested_by === auth()->id()
+                                    && !in_array($m->status, ['Selesai','Ditolak'], true)
+                                    && !empty($m->admin_note);
 
                                 $rawPhotos = [];
                                 if (!empty($m->photos)) {
@@ -127,10 +130,14 @@
                                     'photo_urls'  => $photoUrls,   
                                     'admin_note'  => $m->admin_note,
                                     'edit_url'    => route('maintenance.edit',$m),
+                                    'can_edit'    => auth()->user()?->role === 'admin' || $canRequesterEdit,
                                 ];
                             @endphp
 
-                            <tr class="hover:bg-gray-50" x-data="{ item: @js($detailPayload) }">
+                            <tr class="hover:bg-gray-50"
+                                x-data="{ item: @js($detailPayload) }"
+                                data-maintenance-id="{{ $m->id }}"
+                                data-item='@json($detailPayload)'>
                                 <td class="px-3 py-3 text-slate-500">{{ $rowNumber }}</td>
 
                                 {{-- Info barang --}}
@@ -261,6 +268,12 @@
                                                Edit
                                             </a>
                                         @endadmin
+                                        @if($canRequesterEdit)
+                                            <a href="{{ route('maintenance.edit',$m) }}" @click.stop
+                                               class="hidden md:inline px-3 py-1.5 rounded-lg bg-white border hover:bg-gray-50" title="Edit">
+                                               Edit
+                                            </a>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -292,35 +305,52 @@
                     </button>
 
                     <h2 class="text-lg font-semibold text-gray-900 mb-2">
-                        Pilih Barang untuk Cetak PDF
+                        Pilih Riwayat Selesai untuk Cetak PDF
                     </h2>
                     <p class="text-xs text-gray-500 mb-4">
-                        Pilih salah satu barang yang memiliki data pemeliharaan.
+                        Pilih riwayat pemeliharaan berstatus selesai yang ingin dimasukkan ke PDF.
                     </p>
 
-                    <form action="{{ route('maintenance.pdf') }}" method="GET" target="_blank">
-                        <div class="max-h-60 overflow-y-auto space-y-1 border rounded-lg p-3 bg-gray-50">
-                            @if(isset($barangList) && count($barangList))
-                                @foreach($barangList as $b)
-                                    <label class="flex items-center gap-2 text-sm cursor-pointer py-1">
-                                        <input type="radio"
-                                               name="barang_id"
-                                               value="{{ $b->id }}"
-                                               class="text-blue-600 border-gray-300 focus:ring-blue-500"
-                                               required>
-                                        <div>
+                    <form action="{{ route('maintenance.pdf') }}" method="GET" target="_blank" data-pdf-form>
+                        <div class="max-h-60 overflow-y-auto space-y-2 border rounded-lg p-3 bg-gray-50">
+                            @if(isset($maintenanceByBarang) && $maintenanceByBarang->count())
+                                @foreach($maintenanceByBarang as $list)
+                                    @php $barang = $list->first()->barang ?? null; @endphp
+                                    <div class="border rounded-lg bg-white p-3 shadow-sm">
+                                        <div class="flex items-center justify-between gap-3">
                                             <div class="font-medium text-gray-900">
-                                                {{ $b->nama_barang ?? '-' }}
+                                                {{ $barang->nama_barang ?? '-' }}
                                             </div>
                                             <div class="text-xs text-gray-500">
-                                                {{ $b->kode_register ?? $b->kode_barang ?? '' }}
+                                                {{ $barang->kode_register ?? $barang->kode_barang ?? '' }}
                                             </div>
                                         </div>
-                                    </label>
+                                        <div class="mt-2 space-y-1">
+                                            @foreach($list as $m)
+                                                <label class="flex items-start gap-2 text-sm cursor-pointer py-1">
+                                                    <input type="checkbox"
+                                                           name="maintenance_id[]"
+                                                           value="{{ $m->id }}"
+                                                           class="mt-1 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                                    <div>
+                                                        <div class="font-semibold text-gray-800">
+                                                            {{ optional($m->tanggal_mulai)->format('d/m/Y') ?? '-' }} • {{ $m->status }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-500">
+                                                            Biaya: {{ $m->biaya ? 'Rp '.number_format((int)$m->biaya,0,',','.') : '-' }}
+                                                            @if($m->uraian)
+                                                                | {{ \Illuminate\Support\Str::limit($m->uraian, 80) }}
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 @endforeach
                             @else
                                 <p class="text-xs text-gray-500">
-                                    Belum ada daftar barang untuk dicetak.
+                                    Belum ada riwayat pemeliharaan yang bisa dicetak.
                                 </p>
                             @endif
                         </div>
@@ -485,9 +515,11 @@
                 </template>
 
                     <div class="flex items-center justify-end gap-2 p-5 border-t">
-                        @if(auth()->user()?->role === 'admin')
-                            <a :href="rec.edit_url"
-                               class="px-4 py-2 rounded-lg bg-white border hover:bg-gray-50">Edit</a>
+                        @if(auth()->check())
+                            <template x-if="rec.can_edit">
+                                <a :href="rec.edit_url"
+                                   class="px-4 py-2 rounded-lg bg-white border hover:bg-gray-50">Edit</a>
+                            </template>
                         @endif
                         <button class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200" @click="close">Tutup</button>
                     </div>
@@ -536,6 +568,26 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const targetId = params.get('maintenance_id');
+            if (!targetId) return;
+
+            const row = document.querySelector(`[data-maintenance-id="${targetId}"]`);
+            if (!row) return;
+
+            try {
+                const payload = row.dataset.item ? JSON.parse(row.dataset.item) : null;
+                if (payload) {
+                    window.dispatchEvent(new CustomEvent('m-show', { detail: payload }));
+                }
+            } catch (e) {
+                console.error('Failed to open maintenance detail from query param', e);
+            }
+        });
+    </script>
+
     {{-- SweetAlert2 CDN --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -566,9 +618,24 @@
         });
       };
 
+      const pdfForm = document.querySelector('form[data-pdf-form]');
+      if (pdfForm) {
+        pdfForm.addEventListener('submit', (e) => {
+          const checked = pdfForm.querySelectorAll('input[name="maintenance_id[]"]:checked').length;
+          if (!checked) {
+            e.preventDefault();
+            Swal.fire({
+              icon: 'warning',
+              title: 'Pilih riwayat',
+              text: 'Pilih minimal satu riwayat pemeliharaan untuk dicetak.',
+            });
+          }
+        });
+      }
+
       bindConfirm('.btn-approve', () => ({
         title: 'Setujui pengajuan?',
-        text:  'Status akan menjadi Approved.',
+        text:  'Pengajuan ini akan diterima',
         icon:  'question',
         confirmText: 'Setujui',
         confirmColor: '#16a34a',
@@ -576,7 +643,7 @@
 
       bindConfirm('.btn-reject', () => ({
         title: 'Tolak pengajuan?',
-        text:  'Status akan menjadi Rejected.',
+        text:  'Pengajuan ini akan ditolak',
         icon:  'warning',
         confirmText: 'Tolak',
         confirmColor: '#dc2626',
@@ -584,7 +651,7 @@
 
       bindConfirm('.btn-complete', () => ({
         title: 'Tandai selesai?',
-        text:  'Status akan menjadi Completed.',
+        text:  'Status akan menjadi Selesai',
         icon:  'question',
         confirmText: 'Complete',
         confirmColor: '#0ea5e9',

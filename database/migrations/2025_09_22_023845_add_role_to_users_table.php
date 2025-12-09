@@ -8,7 +8,6 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // string saja supaya portable di semua DB; default pengelola
             $table->string('role', 20)->default('pengelola')->after('password');
             $table->index('role');
         });

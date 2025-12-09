@@ -181,7 +181,7 @@
                                hover:file:bg-blue-100">
 
                     <span class="block text-xs text-gray-500 mt-2">
-                        Maksimal 10 foto, masing-masing ≤ 4MB. Format: JPG/PNG/WEBP.
+                        Format: jpg, jpeg, png. Maksimal 2MB.
                     </span>
 
                     @error('photos')

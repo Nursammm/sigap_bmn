@@ -7,6 +7,11 @@
             <form action="{{ route('barang.update', $barang->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 @method('PUT')
+                @php
+                    $existingPhotos = is_array($barang->foto_url)
+                        ? $barang->foto_url
+                        : ($barang->foto_url ? (array) $barang->foto_url : []);
+                @endphp
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     
@@ -95,14 +100,22 @@
                     <label class="block text-sm font-medium text-gray-600 mb-2">Foto Barang</label>
 
                     <!-- Foto Lama -->
-                    @if(!empty($barang->foto_url) && is_array($barang->foto_url))
-                        <div class="grid grid-cols-3 gap-3 mb-4">
-                            @foreach($barang->foto_url as $foto)
-                                <img src="{{ asset('storage/'.$foto) }}" 
-                                     onclick="openModal('{{ asset('storage/'.$foto) }}')" 
-                                     class="w-28 h-28 object-cover rounded-lg border cursor-pointer hover:opacity-80">
+                    @if(count($existingPhotos))
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                            @foreach($existingPhotos as $foto)
+                                <div class="border rounded-lg p-2 space-y-2">
+                                    <img src="{{ asset('storage/'.$foto) }}" 
+                                         onclick="openModal('{{ asset('storage/'.$foto) }}')" 
+                                         class="w-full h-28 object-cover rounded-md border cursor-pointer hover:opacity-80">
+                                    <label class="flex items-center gap-2 text-xs text-red-600">
+                                        <input type="checkbox" name="remove_photos[]" value="{{ $foto }}" class="rounded border-gray-300">
+                                        Hapus foto ini
+                                    </label>
+                                </div>
                             @endforeach
                         </div>
+                    @else
+                        <p class="text-xs text-gray-500 mb-3">Belum ada foto yang diunggah.</p>
                     @endif
 
                     <!-- Input Multiple -->

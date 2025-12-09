@@ -61,6 +61,11 @@ class NotificationController extends Controller
             $notification->markAsRead();
         }
 
+        $redirect = $request->input('redirect');
+        if ($redirect) {
+            return redirect()->to($redirect);
+        }
+
         return back()->with('okk', 'Notifikasi ditandai dibaca.');
     }
 

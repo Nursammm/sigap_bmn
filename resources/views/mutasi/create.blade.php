@@ -6,35 +6,37 @@
         $isAdmin = $user && $user->role === 'admin';
     @endphp
 
-    <div class="max-w-xl mx-auto mt-10">
-        <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-            <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
-                <div>
-                    <h1 class="text-lg font-semibold">
-                        {{ $isAdmin ? 'Mutasi Barang' : 'Ajukan Mutasi Barang' }}
+    <div class="max-w-3xl mx-auto mt-10">
+        <div class="bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
+            <div class="px-6 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-100">Mutasi Lokasi</p>
+                    <h1 class="text-xl font-semibold">
+                        {{ $isAdmin ? 'Pindahkan Barang' : 'Ajukan Mutasi Barang' }}
                     </h1>
-                    <p class="text-xs text-blue-100 mt-0.5">
-                        Isi data berikut untuk memindahkan lokasi barang.
+                    <p class="text-sm text-blue-100">
+                        Lengkapi detail tujuan dan tanggal mutasi.
                     </p>
                 </div>
-                <span class="px-3 py-1 text-[11px] rounded-full bg-white/10 border border-white/30 uppercase tracking-wide">
+                <span class="inline-flex items-center gap-2 px-3 py-1 text-[11px] rounded-full bg-white/15 border border-white/30 uppercase tracking-wide">
+                    <span class="size-2 rounded-full bg-white/80"></span>
                     {{ $isAdmin ? 'Admin' : 'Pengelola' }}
                 </span>
             </div>
 
-            <div class="px-6 pt-5 pb-3 bg-gray-50 border-b border-gray-100 text-sm text-gray-700">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-1">
+            <div class="px-6 pt-5 pb-4 bg-gray-50 border-b border-gray-100 text-sm text-gray-700">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                     <div>
-                        <span class="font-semibold">Barang:</span>
-                        <span>{{ $barang->nama_barang }}</span>
+                        <p class="text-xs text-gray-500">Barang</p>
+                        <p class="font-semibold text-gray-900">{{ $barang->nama_barang }}</p>
                     </div>
                     <div>
-                        <span class="font-semibold">Kode Register:</span>
-                        <span class="font-mono text-xs">{{ $barang->kode_register }}</span>
+                        <p class="text-xs text-gray-500">Kode Register</p>
+                        <p class="font-mono text-sm text-gray-800">{{ $barang->kode_register ?? '–' }}</p>
                     </div>
                     <div class="sm:col-span-2">
-                        <span class="font-semibold">Lokasi Saat Ini:</span>
-                        <span>{{ optional($barang->location)->name ?? '—' }}</span>
+                        <p class="text-xs text-gray-500">Lokasi Saat Ini</p>
+                        <p class="font-semibold text-gray-900">{{ optional($barang->location)->name ?? '–' }}</p>
                     </div>
                 </div>
             </div>
@@ -49,8 +51,8 @@
             >
                 @csrf
 
-                <div x-data="{ showOther: {{ old('lokasi_baru') ? 'true' : 'false' }} }">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                <div x-data="{ showOther: {{ old('lokasi_baru') ? 'true' : 'false' }} }" class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-800">
                         Lokasi Tujuan <span class="text-red-500">*</span>
                     </label>
 
@@ -75,8 +77,8 @@
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
 
-                    <div x-show="showOther" x-cloak class="mt-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <div x-show="showOther" x-cloak class="mt-2 space-y-1">
+                        <label class="block text-sm font-semibold text-gray-800">
                             Lokasi Baru
                         </label>
                         <input
@@ -96,7 +98,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-semibold text-gray-800 mb-1">
                         Tanggal Mutasi <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -111,7 +113,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                    <label class="block text-sm font-semibold text-gray-800 mb-1">
                         Catatan
                     </label>
                     <textarea

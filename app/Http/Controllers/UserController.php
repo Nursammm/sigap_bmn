@@ -23,10 +23,10 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'     => ['required','string','max:255'],
-            'email'    => ['required','email','max:255','unique:users,email'],
-            'role'     => ['required','string','max:50'],
-            'password' => ['required','string','min:6'],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
+            'role'     => ['required', 'string', 'max:50', Rule::in(User::ROLES)],
+            'password' => ['required', 'string', 'min:6'],
         ]);
 
         User::create([
@@ -41,47 +41,48 @@ class UserController extends Controller
             ->with('success', 'Pengguna berhasil ditambahkan');
     }
 
-    public function edit($id)
+    public function edit(User $user)
     {
-        $user = User::findOrFail($id);
+        // pakai route model binding: users/{user}
         return view('users.edit', compact('user'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user)
     {
-        $user = User::findOrFail($id);
-
         $validated = $request->validate([
-            'name'  => ['required','string','max:255'],
+            'name'  => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
-            'role'  => ['required','string','max:50'],
-            'password' => ['nullable','string','min:6'],
+            'role'     => ['required', 'string', 'max:50', Rule::in(User::ROLES)],
+            'password' => ['nullable', 'string', 'min:6'],
         ]);
 
+        // Data dasar yang selalu diupdate
         $data = [
             'name'  => $validated['name'],
             'email' => $validated['email'],
             'role'  => $validated['role'],
         ];
 
+        // Hanya update password kalau diisi
         if (!empty($validated['password'])) {
             $data['password'] = Hash::make($validated['password']);
         }
 
         $user->update($data);
+
         return redirect()
-            ->back()
+            ->route('users.index')
             ->with('success', 'Data pengguna berhasil diubah');
     }
 
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        User::findOrFail($id)->delete();
+        $user->delete();
 
         return redirect()
             ->route('users.index')

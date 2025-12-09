@@ -9,6 +9,10 @@ use App\Http\Controllers\RuanganController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\TelegramAIController;
+
+Route::post('/api/telegram/webhook', [TelegramAIController::class, 'handle']);
+Route::get('/telegram/setup-webhook', [TelegramAIController::class, 'setWebhook']);
 
 // untuk filter "read all" notifikasi mutasi
 use App\Notifications\MutasiRequestedNotification;
@@ -151,7 +155,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ->name('notifications.destroySelected');
    });
 
-   Route::resource('users', UserController::class);
+   Route::middleware('role:admin')->group(function () {
+       Route::resource('users', UserController::class);
+   });
 
    
 

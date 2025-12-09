@@ -1,25 +1,25 @@
 <x-layout>
     <x-slot name="title">Manajemen Pengguna</x-slot>
 
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto space-y-4">
 
         @if (session('success'))
-            <div class="mb-4 px-4 py-3 rounded-lg bg-green-50 text-green-700 border border-green-200">
+            <div class="px-4 py-3 rounded-xl bg-green-50 text-green-700 border border-green-200 shadow-sm">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 text-red-700 border border-red-200">
+            <div class="px-4 py-3 rounded-xl bg-red-50 text-red-700 border border-red-200 shadow-sm">
                 {{ session('error') }}
             </div>
         @endif
 
+
+
         <div class="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden">
             <div class="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
-                <h2 class="text-lg font-semibold text-gray-800">
-
-                </h2>
+                <h2 class="text-lg font-semibold text-gray-800">Pengguna Terdaftar</h2>
 
                 <a href="{{ route('users.create') }}"
                    class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-md
@@ -53,7 +53,10 @@
                                     {{ $user->email }}
                                 </td>
                                 <td class="px-3 py-2 border align-middle">
-                                    {{ strtoupper($user->role ?? '-') }}
+                                    <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset
+                                        {{ ($user->role === 'admin') ? 'bg-blue-50 text-blue-700 ring-blue-200' : 'bg-emerald-50 text-emerald-700 ring-emerald-200' }}">
+                                        {{ strtoupper($user->role ?? '-') }}
+                                    </span>
                                 </td>
                                 <td class="px-3 py-2 border text-center align-middle">
                                     <div class="inline-flex gap-1">
